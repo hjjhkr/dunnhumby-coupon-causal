@@ -1,0 +1,14 @@
+# Data stays out of the repository: dunnhumby's terms of use do not allow redistribution
+data/raw/
+data/processed/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}</style>
+<title>Do Coupons Create Sales</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one 660px text column tells the story; charts break out to 920px. The page opens with a result card shaped like a coupon. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --ink: #10182b; --ink-2: #47526a; --muted: #717b8e;
+  --line: #dde1e8; --axis: #b9c0cc; --wash: #eceff4;
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --neutral: #8a909c;
+  --accent: #1f5fb4; --accent-soft: #e4eefb; --band-a: rgba(42,120,214,.10); --band-b: rgba(16,24,43,.06);
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1219; --surface: #161b26; --ink: #eef1f6; --ink-2: #b6bfce; --muted: #8590a3;
+    --line: #2a3140; --axis: #3a4354; --wash: #1c2230;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --neutral: #7d8696;
+    --accent: #7fb2f2; --accent-soft: #17263b; --band-a: rgba(57,135,229,.16); --band-b: rgba(238,241,246,.06);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1219; --surface: #161b26; --ink: #eef1f6; --ink-2: #b6bfce; --muted: #8590a3;
+  --line: #2a3140; --axis: #3a4354; --wash: #1c2230;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --neutral: #7d8696;
+  --accent: #7fb2f2; --accent-soft: #17263b; --band-a: rgba(57,135,229,.16); --band-b: rgba(238,241,246,.06);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.7; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 56px 96px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.col { width: 100%; max-width: 660px; margin-inline: auto; }
+.wide { width: 100%; max-width: 920px; margin-inline: auto; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(36px, 6.4vw, 60px); font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: clamp(25px, 3.8vw, 34px); font-weight: 700; }
+h3 { font-size: 18px; font-weight: 600; font-family: var(--body); line-height: 1.35; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.lede { font-size: 20px; color: var(--ink-2); line-height: 1.6; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+b, strong { font-weight: 600; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.hero { display: flex; flex-direction: column; gap: 22px; }
+.hero .col { display: flex; flex-direction: column; gap: 22px; }
+
+/* Result card, shaped like a coupon with a tear line */
+.coupon { margin-top: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  display: grid; grid-template-columns: 200px 1fr; position: relative; }
+.coupon .stub { padding: 26px 22px; border-right: 2px dashed var(--line); display: flex; flex-direction: column; gap: 10px; justify-content: space-between; position: relative; }
+.coupon .stub::before, .coupon .stub::after { content: ""; position: absolute; right: -11px; width: 20px; height: 20px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); }
+.coupon .stub::before { top: -11px; clip-path: inset(50% 0 0 0); }
+.coupon .stub::after { bottom: -11px; clip-path: inset(0 0 50% 0); }
+.coupon .stub .t { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--muted); }
+.coupon .stub .v { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.25; }
+.coupon .stub .s { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.coupon .figs { display: grid; grid-template-columns: repeat(3, 1fr); }
+.coupon .fig { padding: 26px 22px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.coupon .fig + .fig { border-left: 1px solid var(--line); }
+.coupon .fig .big { font-family: var(--mono); font-size: clamp(30px, 4.4vw, 44px); font-weight: 500; line-height: 1.1; color: var(--accent); }
+.coupon .fig .lab { font-size: 15px; font-weight: 500; line-height: 1.45; }
+.coupon .fig .sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+@media (max-width: 760px) {
+  .coupon { grid-template-columns: 1fr; }
+  .coupon .stub { border-right: 0; border-bottom: 2px dashed var(--line); flex-direction: row; align-items: baseline; flex-wrap: wrap; }
+  .coupon .stub::before, .coupon .stub::after { display: none; }
+  .coupon .figs { grid-template-columns: 1fr; }
+  .coupon .fig + .fig { border-left: 0; border-top: 1px solid var(--line); }
+}
+
+main { display: flex; flex-direction: column; gap: 84px; margin-top: 72px; }
+section { display: flex; flex-direction: column; gap: 26px; }
+section > .col { display: flex; flex-direction: column; gap: 18px; }
+.kicker { font-family: var(--mono); font-size: 13px; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; }
+.note { font-size: 15.5px; color: var(--ink-2); background: var(--wash); border-radius: 10px; padding: 16px 20px; line-height: 1.65; }
+.note b { color: var(--ink); }
+
+/* Chart container */
+figure.chart { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px 24px 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figure.chart .ctitle { font-size: 17px; font-weight: 600; line-height: 1.4; }
+figure.chart .csub { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.legend i.sq { height: 10px; width: 10px; border-radius: 2px; }
+.plot { position: relative; min-width: 0; }
+.plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.plot text { font-family: var(--body); fill: var(--muted); font-size: 12.5px; }
+.plot text.val { fill: var(--ink); font-size: 13px; font-family: var(--mono); }
+.plot text.dl { fill: var(--ink); font-size: 13px; }
+.plot text.rg { fill: var(--ink-2); font-size: 12.5px; }
+.plot .grid { stroke: var(--line); stroke-width: 1; }
+.plot .axis { stroke: var(--axis); stroke-width: 1; }
+.plot .hit { fill: transparent; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 13px; line-height: 1.5; padding: 8px 11px; border-radius: 8px; white-space: nowrap; z-index: 5; transform: translate(-50%, calc(-100% - 12px)); }
+.tip b { font-family: var(--mono); font-weight: 500; }
+details.tbl { font-size: 14px; color: var(--ink-2); }
+details.tbl summary { cursor: pointer; color: var(--muted); padding: 4px 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); }
+td.n, th.n { text-align: right; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.story { font-size: 16px; }
+table.story td, table.story th { padding: 12px 16px 12px 0; }
+.fine { font-size: 14px; color: var(--muted); }
+
+/* Row of numbers */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.stats > div { padding: 20px 22px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stats > div + div { border-left: 1px solid var(--line); }
+.stats .big { font-family: var(--mono); font-size: 30px; font-weight: 500; line-height: 1.2; }
+.stats .lab { font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+.stats .ci { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+@media (max-width: 640px) { .stats { grid-template-columns: 1fr; } .stats > div + div { border-left: 0; border-top: 1px solid var(--line); } }
+
+/* Timeline of the design */
+.timeline { display: grid; grid-template-columns: 2.3fr 1fr 1fr 1fr 1fr; gap: 3px; font-size: 14px; }
+.timeline > div { padding: 14px 12px; border-radius: 8px; background: var(--wash); display: flex; flex-direction: column; gap: 4px; min-width: 0; line-height: 1.45; }
+.timeline .t { font-weight: 600; }
+.timeline .w { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.timeline .d { color: var(--ink-2); font-size: 13px; }
+.timeline .on { background: var(--accent-soft); }
+.timeline .on .t { color: var(--accent); }
+@media (max-width: 720px) { .timeline { grid-template-columns: 1fr; } }
+
+.recs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.recs > div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 6px; }
+.recs .k { font-family: var(--mono); font-size: 13px; color: var(--accent); letter-spacing: .08em; }
+.recs p { font-size: 15px; color: var(--ink-2); line-height: 1.6; }
+@media (max-width: 720px) { .recs { grid-template-columns: 1fr; } }
+
+details.appendix { border-top: 1px solid var(--line); padding-top: 16px; }
+details.appendix summary { cursor: pointer; font-weight: 600; font-size: 18px; }
+details.appendix > div { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; font-size: 15.5px; color: var(--ink-2); }
+footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px; line-height: 1.7; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="col">
+    <p class="eyebrow">Causal Modeling · Final Project</p>
+    <h1>Do coupons create sales, or just give money away?</h1>
+    <p class="lede">Over two years, a supermarket chain sent <span class="num" data-v="k.n_mailings" data-f="int"></span> coupon mailings to <span class="num" data-v="k.n_recipients" data-f="int"></span> households. We use every purchase made by <span class="num" data-v="k.n_all" data-f="int"></span> households to estimate how much new spending those coupons actually brought in.</p>
+  </div>
+  <div class="wide">
+    <div class="coupon" aria-label="Three headline numbers">
+      <div class="stub">
+        <span class="t">COUPON · RESULT</span>
+        <span class="v">No detectable lift. Mostly a subsidy.</span>
+        <span class="s">dunnhumby "The Complete Journey" · <span data-v="k.n_campaigns" data-f="int"></span> campaigns</span>
+      </div>
+      <div class="figs">
+        <div class="fig">
+          <span class="big" data-v="k.during_pct" data-f="spct0"></span>
+          <span class="lab">change in weekly spending after receiving a campaign</span>
+          <span class="sub">95% confidence interval <span data-v="k.during_pct_lo" data-f="spct0"></span> to <span data-v="k.during_pct_hi" data-f="spct0"></span>, which includes zero</span>
+        </div>
+        <div class="fig">
+          <span class="big" data-v="k.never_redeemed" data-f="pct0"></span>
+          <span class="lab">of recipient households never used a single coupon</span>
+          <span class="sub">Only 1 mailing in 8 was ever used</span>
+        </div>
+        <div class="fig">
+          <span class="big" data-v="k.habit_same_subcat" data-f="pct0"></span>
+          <span class="lab">of redemptions went on product types bought in the last six months</span>
+          <span class="sub">Only <span data-v="k.habit_new_cat" data-f="pct0"></span> went on a new category</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="col">
+    <p class="kicker">The question</p>
+    <h2>What did the coupons buy</h2>
+    <p>A supermarket mails coupons hoping customers will come in more often and buy more. But the customer may use the coupon on the milk they were going to buy anyway. In that case the store has simply given away margin.</p>
+    <p>To know whether a coupon worked, we need something that can never be observed: <b>how much the same household would have spent had it not received the coupon.</b> That is the problem causal inference sets out to solve.</p>
+    <p>The data is dunnhumby's public "The Complete Journey": every purchase made by <span data-v="k.n_all" data-f="int"></span> households at a US supermarket chain over about two years, the <span data-v="k.n_campaigns" data-f="int"></span> coupon campaigns run in that time, who received them and who redeemed.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">First impression</p>
+    <h2>Households that got coupons spend <span data-v="k.ratio_after" data-f="x1"></span> times as much</h2>
+    <p>The most direct approach is to compare households that received coupons with households that never did. Once campaigns are running, the first group spends about <span data-v="k.treated_after" data-f="usd0"></span> a week and the second only <span data-v="k.never_after" data-f="usd0"></span>. Coupons look spectacularly effective.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-naive"></figure></div>
+  <div class="col">
+    <p>But look at the left pair of bars. <b>Before a single coupon was sent, the two groups were already <span data-v="k.ratio_before" data-f="x1"></span> times apart.</b> The gap was not caused by the coupons. It was caused by who the retailer chose.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Trap one</p>
+    <h2>The retailer sends coupons to the people who shop most often</h2>
+    <p>The data does not say how the retailer decides who gets a coupon, but it can be worked out. Take the largest campaign (starts in week 60, 1,076 recipients). The number of weeks a household shopped in <b>weeks 35–43</b> almost fully determines whether it received the campaign.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-selection"></figure></div>
+  <div class="col">
+    <p>Of the households that did not shop once in those 9 weeks, none received the campaign. Of those that shopped in 7 or more of them, close to nine in ten did. The window ends <span data-v="k.sel_lag" data-f="int"></span> weeks before the campaign starts: the retailer fixed its list about four months ahead, from the purchase records of that time.</p>
+    <p class="note"><b>This is bad news and good news.</b> The bad news is that recipients and non-recipients are not comparable at all. The good news is that the selection rule can be recovered from the data, so we know what a proper comparison household looks like: one that was just as active in the same weeks but was not chosen.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Trap two</p>
+    <h2>Households are chosen at a high point</h2>
+    <p>A household's shopping goes up and down from month to month. The retailer picks households that were especially active in those 9 weeks, and some of them just happened to buy a lot then. Afterwards their spending drifts back down, even if they never receive a coupon.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-meanrev"></figure></div>
+  <div class="col">
+    <p>These households spent <span data-v="k.mr_sel" data-f="usd1"></span> a week during the selection window. <b>Before receiving any coupon, their spending had already fallen by <span data-v="k.mr_drop" data-f="abspct0"></span>.</b> This is regression to the mean.</p>
+    <p>If we use the households that were not chosen as the reference in a before/after comparison, recipients' spending appears to fall relative to them, and we would conclude that coupons make people spend less.</p>
+  </div>
+  <div class="wide">
+    <div class="scroll"><table class="story">
+      <thead><tr><th>Approach</th><th>What it concludes</th><th>What is wrong</th></tr></thead>
+      <tbody>
+        <tr><td>Compare recipients with non-recipients</td><td>Coupons multiply spending several times</td><td>Recipients bought more to begin with</td></tr>
+        <tr><td>Before/after, with non-recipients as the reference</td><td>Coupons cut spending by <span data-v="k.did_during_pct" data-f="abspct0"></span>–<span data-v="k.did_after_pct" data-f="abspct0"></span></td><td>Recipients were chosen at a high point</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Our approach</p>
+    <h2>Find households that were just as active but not chosen yet</h2>
+    <p>We look only at the moment each household receives a campaign for the <b>first</b> time: <span data-v="k.n_treated" data-f="int"></span> households in all. The control group is the households that had not received any campaign by then.</p>
+    <p>Each control household then gets a weight, chosen so that the weighted control group matches the recipients on pre-campaign spending, number of trips and how often they came in. Controls that bought a lot beforehand get a large weight; those that bought little get a small one.</p>
+    <p>Finally we compare the <b>change</b> in the two groups from before to after the campaign. This is difference-in-differences.</p>
+  </div>
+  <div class="wide">
+    <div class="timeline" role="img" aria-label="Timeline: period used for weighting, baseline window, check window, campaign, after the campaign">
+      <div><span class="t">Used to build the controls</span><span class="w">week −9 and earlier</span><span class="d">Purchase records from this period set the control weights. The retailer's selection window falls in here.</span></div>
+      <div><span class="t">Baseline</span><span class="w">weeks −16 to −9</span><span class="d">Later changes are measured against it.</span></div>
+      <div class="on"><span class="t">Check window</span><span class="w">weeks −8 to −1</span><span class="d">Deliberately not used for weighting. The two groups should move together here.</span></div>
+      <div><span class="t">Campaign</span><span class="w">weeks 0 to 6</span><span class="d">Coupons are valid.</span></div>
+      <div><span class="t">Afterwards</span><span class="w">weeks 7 to 12</span><span class="d">Does spending fall back?</span></div>
+    </div>
+  </div>
+  <div class="col">
+    <p class="note"><b>The check window is the most important part of the design.</b> Difference-in-differences assumes that without coupons the two groups would have moved in the same way. That cannot be verified directly. So we leave the last 8 weeks before the campaign unused and see whether the groups really do move together while nobody has received a coupon yet. If they do not, the later results cannot be trusted.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">The result</p>
+    <h2>The two lines move together, and stay together once the campaign starts</h2>
+    <p>Blue is the coupon recipients. Orange is the weighted control group. Grey is the control group before weighting; it is nowhere near the recipients.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-levels"></figure></div>
+  <div class="col">
+    <p>In the check window the blue and orange lines are tangled together, which says the controls are well chosen. Once the campaign starts, the blue line does not rise above the orange one.</p>
+  </div>
+  <div class="wide">
+    <div class="stats">
+      <div><span class="lab">Check window (should be zero)</span><span class="big" data-v="k.holdout_pct" data-f="spct1"></span><span class="ci"><span data-v="k.holdout_pct_lo" data-f="spct0"></span> to <span data-v="k.holdout_pct_hi" data-f="spct0"></span></span></div>
+      <div><span class="lab">During the campaign</span><span class="big" data-v="k.during_pct" data-f="spct1"></span><span class="ci"><span data-v="k.during_pct_lo" data-f="spct0"></span> to <span data-v="k.during_pct_hi" data-f="spct0"></span></span></div>
+      <div><span class="lab">After the campaign</span><span class="big" data-v="k.after_pct" data-f="spct1"></span><span class="ci"><span data-v="k.after_pct_lo" data-f="spct0"></span> to <span data-v="k.after_pct_hi" data-f="spct0"></span></span></div>
+    </div>
+  </div>
+  <div class="col">
+    <p>During the campaign, recipients' weekly spending changes by <b><span data-v="k.during_est" data-f="susd2"></span></b>, which is <b><span data-v="k.during_pct" data-f="spct1"></span></b> of their baseline spending of <span data-v="k.base" data-f="usd1"></span>. The 95% confidence interval runs from <span data-v="k.during_pct_lo" data-f="spct0"></span> to <span data-v="k.during_pct_hi" data-f="spct0"></span> and includes zero. Trips and store visits did not rise either.</p>
+    <p>The accurate statement is: <b>no effect was detected, and a lift larger than about <span data-v="k.during_pct_hi" data-f="abspct0"></span> can be ruled out.</b> That is not the same as proving the effect is zero.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-event"></figure></div>
+  <div class="col">
+    <p>Subtracting one line from the other gives the effect in each week. The <b>blue</b> line is the weighted estimate; it hovers around zero throughout. The <b>orange</b> line is a plain difference-in-differences with no adjustment: it starts sliding during the check window, when nobody had received a coupon yet. That is the footprint of regression to the mean, and it is why the plain version cannot be trusted here.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Why nothing shows up</p>
+    <h2>Most coupons were never used</h2>
+    <p>The estimate for total spending is noisy and can only rule out large effects. So look from another angle: for coupons to create new sales, somebody has to use them first.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-funnel"></figure></div>
+  <div class="col">
+    <p>Of the <span data-v="k.n_recipients" data-f="int"></span> recipient households, <b><span data-v="k.never_redeemed" data-f="pct0"></span> never redeemed a single campaign coupon.</b> Redemption is highly concentrated: <span data-v="k.n_half" data-f="int"></span> households (<span data-v="k.n_half_share" data-f="pct0"></span> of recipients) account for half of all redemptions.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-who"></figure></div>
+  <div class="col">
+    <p>Coupons are used mainly by the households that already buy the most. <b>The people who use coupons are exactly the people who least need a coupon to come in.</b></p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">The coupons that were used</p>
+    <h2>They bought what these households were buying already</h2>
+    <p>We matched each redemption back to that day's receipt to find the redeemed product, and then checked whether the household had bought it in the six months before the campaign started.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-habit"></figure></div>
+  <div class="col">
+    <p><span data-v="k.habit_same_product" data-f="pct0"></span> of redeemed items are the <b>identical product</b> the household had bought in the previous six months, and another <span data-v="k.habit_same_sub_only" data-f="pct0"></span> are in a sub-category it had bought (a different brand of yogurt, say). Together that is <b><span data-v="k.habit_same_subcat" data-f="pct0"></span></b>.</p>
+    <p>Compared with what the same households bought without a coupon in the same weeks, the coupon purchases are more familiar, not less. Coupons did not steer people toward anything new. The most redeemed products are ice cream, cold cereal, frozen meat, cheese, frozen pizza and milk.</p>
+    <p class="note"><b>An upper bound.</b> A redemption takes about <span data-v="k.mean_disc" data-f="usd2"></span> off, and the redeemed item sells for <span data-v="k.mean_item" data-f="usd2"></span> on average. Even assuming every redeemed item would not have been bought without the coupon, the spending directly generated is only <span data-v="k.max_direct_share" data-f="pct1"></span> of what recipient households spent in the same periods.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">A more sensitive test</p>
+    <h2>Recipients did not shift more of their spending to promoted products</h2>
+    <p>Perhaps coupons work as a reminder: households buy more of the promoted products after receiving them, without using the coupon at the till. If so, <b>the share of recipients' spending that goes to promoted products</b> should rise.</p>
+    <p>This measure is far more sensitive than total spending. Whether a household buys more or less in a given week moves promoted and other products alike, and taking a share cancels that swing.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-share"></figure></div>
+  <div class="col">
+    <p>In the large personalized campaigns, promoted products make up <span data-v="k.share_a_pre" data-f="pct0"></span> of recipients' spending before the campaign and <span data-v="k.share_a_during" data-f="pct0"></span> during it. Relative to households not sent the campaign, the share changes by only <span data-v="k.share_a_ddd" data-f="spp1"></span> percentage points, with a confidence interval whose upper end is below 1 point.</p>
+    <p><b>The coupons did not change what people buy.</b></p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">A tempting mistake</p>
+    <h2>"Customers who used a coupon spent more"</h2>
+    <p>Many marketing reports compare people who used a coupon with people who did not. Done that way, households that redeemed spend <span data-v="k.redeemers_during" data-f="usd1"></span> a week more than the controls during the campaign.</p>
+    <p>But <b>in the 8 weeks before the campaign started, they were already spending <span data-v="k.redeemers_holdout" data-f="usd1"></span> more.</b> The households that go on to use a coupon are the ones whose buying was already rising. Whether to redeem is the customer's own choice after the coupon arrives; splitting on it treats an outcome as a cause.</p>
+    <p>That is why this study compares households by whether they <i>received</i> coupons, not by whether they <i>used</i> them.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Does it hold up</p>
+    <h2>Different methods, samples and controls give the same answer</h2>
+    <p>We re-estimated the effect during the campaign in several other ways. Each one is close to zero, and each confidence interval includes zero.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-robust"></figure></div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">The limits of this data</p>
+    <h2>Detecting a 1% lift would take about <span data-v="k.n_for_1pct_k" data-f="int"></span>,000 households per group</h2>
+    <p>A household's weekly spending swings a lot. The average is <span data-v="k.base" data-f="usd0"></span> a week, but the change from before to after has a standard deviation of <span data-v="k.sd_change" data-f="usd0"></span>. With that much noise, small effects need very large samples to show up.</p>
+  </div>
+  <div class="col">
+    <div class="scroll"><table class="story" id="t-power">
+      <thead><tr><th>Lift to detect</th><th class="n">Per week</th><th class="n">Households needed per group in a randomized test</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="fine">At a 5% significance level and 80% power. This study has <span data-v="k.n_treated" data-f="int"></span> treated households.</p>
+  </div>
+  <div class="col">
+    <p>The smallest effect this study could reliably detect is about <span data-v="k.mde_pct" data-f="abspct0"></span>. Yet, as computed above, redemptions can have generated at most <span data-v="k.max_direct_share" data-f="pct1"></span> of spending directly. <b>Even if coupons do have an effect of a few tenths of a percent, 2,500 households cannot show it.</b></p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Conclusion and recommendations</p>
+    <h2>The coupons mostly subsidized purchases that would have happened anyway</h2>
+    <p>In this data, targeted coupon campaigns produced no detectable increase in spending. All the evidence points the same way: coupons went to the most loyal customers, most were never used, and the ones that were used went on things those customers were already buying.</p>
+  </div>
+  <div class="wide">
+    <div class="recs">
+      <div><span class="k">01</span><h3>Hold out a random control group in every campaign</h3><p>Leave 5–10% of the targeted households, chosen at random, without coupons. The lift can then be measured directly, with no adjustment at all. The cost is only that a few customers get their coupons one campaign later.</p></div>
+      <div><span class="k">02</span><h3>Rethink who gets coupons</h3><p>The current rule sends coupons to whoever buys most. Send some to customers whose shopping frequency is middling or falling. They are the ones a coupon can still change.</p></div>
+      <div><span class="k">03</span><h3>Rethink which coupons to send</h3><p>Only a coupon for a category the customer has not bought can create a new purchase. Today just <span data-v="k.habit_new_cat" data-f="pct0"></span> of redemptions go on a new category.</p></div>
+      <div><span class="k">04</span><h3>Judge campaigns by incremental sales, not redemption rate</h3><p>A high redemption rate only says the coupons were used. It does not say they brought in new spending.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <details class="appendix">
+      <summary>Appendix: method and limitations</summary>
+      <div>
+        <p><b>Sample.</b> The first 16 weeks of the data are a ramp-up during which households enter the record gradually. Outcomes use weeks 17–101 only. The main analysis keeps the <span data-v="k.n_sample" data-f="int"></span> households that already appear by week 16.</p>
+        <p><b>Treated and controls.</b> The treated are five cohorts of households receiving a large campaign for the first time, <span data-v="k.n_treated" data-f="int"></span> households in total. The controls for each cohort are the households that have not received any campaign by week 12 after that cohort's campaign starts.</p>
+        <p><b>Weighting.</b> Entropy balancing gives the controls weights so that they match the treated on mean weekly spending, mean weekly trips and the share of weeks with a visit in four pre-campaign periods (12 measures). Before weighting, the mean absolute standardized difference between the groups is <span data-v="k.smd_raw" data-f="num2"></span>; after weighting, the largest is <span data-v="k.smd_adj" data-f="num2"></span>.</p>
+        <p><b>Estimator.</b> The main estimator is doubly robust: entropy balancing followed by a regression of the change in spending on the pre-campaign measures, fitted on the controls. Used on their own, regression adjustment gives <span data-v="k.ra_during_pct" data-f="spct1"></span> and entropy balancing <span data-v="k.eb_during_pct" data-f="spct1"></span>.</p>
+        <p><b>Confidence intervals.</b> Household-level bootstrap with 1,000 replications, redoing the weighting and regression each time.</p>
+        <p><b>Limitations.</b> This is not a randomized experiment. The conclusion rests on one assumption: households with the same pre-campaign purchase records would have followed the same path afterwards without coupons. The check window supports it but cannot prove it. Comparable controls are scarce (an effective sample size of a few hundred after weighting), so the confidence interval for total spending is about ±10%. Only the 12 weeks after a first campaign are estimated. The data comes from a single retailer.</p>
+        <p><b>Reproducing it.</b> The whole analysis is in <span class="num">coupon_causal_analysis.ipynb</span> in the project, commented step by step and runnable end to end from the raw data. Every number on this page comes from the <span class="num">outputs/results.json</span> file it writes.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+</main>
+
+<footer class="col">
+  Data: dunnhumby "The Complete Journey". <span data-v="k.n_all" data-f="int"></span> households, days 1–711, <span data-v="k.n_campaigns" data-f="int"></span> coupon campaigns. Amounts in US dollars.
+</footer>
+</div>
+
+<script type="application/json" id="data">{"k": {"n_all": 2500, "n_sample": 2269, "n_campaigns": 30, "n_recipients": 1584, "n_mailings": 7208, "mailings_redeemed": 889, "mailing_rate": 0.12333518312985571, "n_redeemers": 434, "never_redeemed": 0.726010101010101, "n_half": 70, "n_half_share": 0.04419191919191919, "treated_before": 45.325287926235205, "never_before": 10.049138371394232, "treated_after": 49.50261212469618, "never_after": 11.065872874860649, "ratio_before": 4.510365590671701, "ratio_after": 4.47344847392525, "sel_auc": 0.9227047913446678, "sel_lag": 17, "mr_sel": 50.27060846560847, "mr_between": 46.15111160714285, "mr_camp": 46.87289795918367, "mr_drop": -8.194642921984684, "base": 46.2572894482091, "n_treated": 1033, "during_est": 0.5879508938022102, "during_lo": -3.501969507293771, "during_hi": 5.210907375672385, "during_pct": 1.2710448468030013, "during_pct_lo": -7.5706327566267575, "during_pct_hi": 11.265051276959618, "holdout_pct": 2.7363287210075753, "holdout_pct_lo": -4.5444621003075865, "holdout_pct_hi": 11.670579443109327, "after_pct": -1.2836978756591344, "after_pct_lo": -10.238301886140635, "after_pct_hi": 8.811239340681094, "did_holdout_pct": -3.391185575072111, "did_during_pct": -4.392891092688848, "did_after_pct": -10.104921129666163, "ra_during_pct": 1.7525493281574305, "eb_during_pct": 1.269322153968656, "smd_raw": 1.0841750064784543, "smd_adj": 0.046497666406364366, "habit_same_product": 0.46230654018971545, "habit_same_sub_only": 0.35846230654018973, "habit_same_subcat": 0.8207688467299052, "habit_new_cat": 0.05891163255117324, "habit_same_subcat_ordinary": 0.7322753287429065, "habit_new_cat_ordinary": 0.09124885979286573, "mean_disc": 1.139616288175411, "mean_item": 4.019465801298053, "disc_share": 0.001089454166470656, "max_direct_share": 0.003842542274664693, "basket_with": 89.67936534571093, "basket_without": 38.383776989231855, "share_a_pre": 0.35633628916126964, "share_a_during": 0.35540583425370825, "share_a_ddd": 0.12358681761636349, "share_a_ddd_lo": -0.47713891196442276, "share_a_ddd_hi": 0.6987365330548471, "share_a_usd_hi": 0.3937847020768175, "share_a_mailings": 3675.0, "redeemers_during": 7.770489021512681, "redeemers_holdout": 7.51620207397462, "redeemers_n": 266, "infreq_during": -2.8179287963407504, "sd_change": 31.3029417104369, "mde_pct": 13.907548913437463, "n_for_1pct": 71805, "n_for_1pct_k": 72}, "charts": {"selection": {"weeks": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "p": [0.0, 0.0, 0.0094, 0.0634, 0.2788, 0.436, 0.6991, 0.8333, 0.9009, 0.8687], "n": [260, 217, 212, 205, 208, 172, 216, 222, 222, 335]}, "mean_reversion": {"n": 420, "weeks": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78], "weekly": [41.6678, 41.109, 41.9721, 45.0874, 39.2301, 40.9677, 41.8285, 48.9018, 44.3209, 47.5505, 53.1684, 48.7678, 51.8085, 45.4173, 49.6383, 47.2374, 56.0494, 52.798, 44.4171, 42.8595, 49.177, 47.5605, 44.4615, 47.5448, 48.0714, 44.4982, 43.575, 46.2986, 48.7243, 46.6609, 48.0413, 42.727, 42.5702, 51.2305, 46.2622, 48.0181, 47.6651, 47.8069, 51.5851, 44.8765, 41.8963, 47.1989, 53.8128, 42.6517, 46.6525, 41.8214, 52.1522, 47.4818, 42.5013, 38.8992, 47.9796, 48.7388, 41.8669], "smooth": [42.5355, 41.583, 42.7228, 42.0965, 41.7617, 40.6754, 43.8993, 45.0171, 46.9244, 48.3466, 49.8289, 51.2482, 48.6645, 48.9547, 47.431, 50.975, 52.0283, 51.0882, 46.6916, 45.4845, 46.5323, 47.0663, 46.5223, 46.6926, 46.7048, 45.3815, 44.7906, 46.1993, 47.2279, 47.8088, 45.8097, 44.4462, 45.5092, 46.6877, 48.5036, 47.3152, 47.83, 49.019, 48.0895, 46.1193, 44.6572, 47.636, 47.8878, 47.7057, 43.7085, 46.8754, 47.1518, 47.3784, 42.9607, 43.1267, 45.2058, 46.1951, 43.6925]}, "levels": {"ks": [-16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "treated": [46.394, 45.1086, 46.2415, 49.1374, 46.2743, 45.3439, 45.2875, 46.2711, 46.1999, 43.4008, 48.1174, 46.1722, 48.4547, 43.453, 42.5169, 48.0623, 48.1286, 44.6305, 47.294, 46.1091, 49.9089, 47.2488, 43.5987, 47.6165, 48.5273, 45.2213, 42.7233, 43.1584, 46.5988], "control_raw": [16.6983, 16.6752, 17.979, 18.9399, 18.0695, 18.0581, 17.7895, 19.4588, 19.2603, 17.6681, 18.4923, 19.2001, 20.4287, 18.4734, 19.049, 19.9646, 20.9196, 19.8621, 20.0607, 20.4488, 20.966, 21.4156, 19.3786, 22.702, 22.1326, 22.5501, 21.0596, 21.2467, 22.4077], "control_balanced": [46.7396, 46.9714, 46.8492, 45.2778, 45.7026, 45.6779, 40.6162, 51.5509, 44.8212, 39.2978, 41.5863, 46.7369, 45.3807, 47.6908, 45.0392, 46.2658, 47.5021, 52.7487, 44.7325, 47.3052, 43.343, 46.5702, 40.0181, 52.0831, 49.6468, 46.0261, 39.602, 46.3934, 43.5834]}, "event": {"ks": [-16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "dr": [-0.4437, -2.0128, -0.6091, 3.7691, 0.4886, -0.5004, 4.7119, -5.4038, 1.6614, 4.2356, 6.465, -0.5725, 3.0848, -3.991, -2.5703, 1.8131, 0.5167, -8.2195, 2.4833, -1.3952, 6.4612, 0.6332, 3.6361, -4.784, -1.2544, -0.6695, 3.0776, -3.3011, 3.3685], "dr_lo": [-6.5907, -7.8668, -6.6431, -2.549, -6.2284, -6.6104, -0.5087, -13.2473, -6.1563, -3.2489, -0.1877, -6.9801, -3.1458, -11.3997, -10.1596, -6.7136, -7.6716, -16.8495, -5.0111, -9.928, -0.5828, -8.2173, -3.4771, -11.8125, -8.8361, -8.4852, -3.5257, -10.0441, -3.9563], "dr_hi": [7.3502, 4.4062, 4.3976, 8.8822, 8.757, 5.3117, 9.9237, 1.5256, 9.5468, 9.4458, 14.0747, 6.4621, 11.4388, 5.2479, 4.1948, 10.136, 8.2345, 3.3953, 10.423, 7.0469, 14.5116, 9.6984, 10.3757, 5.5344, 7.1369, 7.915, 9.2881, 3.8812, 10.0532], "did": [1.397, 0.1347, -0.0363, 1.8987, -0.094, -1.013, -0.8007, -1.4864, -1.3591, -2.566, 1.3263, -1.3267, -0.2728, -3.3192, -4.8309, -0.201, -1.0897, -3.5304, -1.0654, -2.6385, 0.6441, -2.4656, -4.0787, -3.3842, -1.9041, -5.6275, -6.635, -6.387, -4.1077]}, "quintiles": [{"label": "Lowest 20%", "n": 288, "spend": 7.4654, "share": 0.1319}, {"label": "20-40%", "n": 287, "spend": 20.3336, "share": 0.1603}, {"label": "40-60%", "n": 287, "spend": 33.8373, "share": 0.2125}, {"label": "60-80%", "n": 287, "spend": 54.0315, "share": 0.338}, {"label": "Highest 20%", "n": 288, "spend": 110.8622, "share": 0.5104}], "habit": {"cats": ["Same product bought before", "Same sub-category bought before", "Same category only", "New category"], "redeemed": [0.4623, 0.3585, 0.1203, 0.0589], "ordinary": [0.3968, 0.3355, 0.1765, 0.0912]}, "share": {"ks": [-16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "ddd": [0.4575, 0.415, -0.0505, -0.0595, 0.8702, -0.1854, -0.4375, -0.333, -0.0403, 0.0772, 0.1797, 0.2334, -0.8165, -0.3327, 0.6174, 0.0819, 0.3498, -0.4791, 1.2025, 0.0102, -0.6153, 0.2933, 0.1036, -0.9473, -0.9936, -0.2289, -0.7944, 0.2061, -0.6292], "lo": [-0.9549, -1.0084, -1.3551, -1.1309, -0.4517, -1.6679, -1.9011, -1.7233, -1.1851, -0.9963, -1.0314, -0.815, -1.9049, -1.4654, -0.4867, -1.0127, -0.8655, -1.6603, -0.0184, -1.1137, -1.8832, -0.8763, -1.0902, -2.1414, -2.3343, -1.4071, -2.0089, -1.046, -1.7672], "hi": [1.699, 1.7733, 1.2215, 1.1535, 2.3273, 1.4291, 1.0151, 1.0791, 1.074, 1.2471, 1.4252, 1.2932, 0.198, 0.7639, 1.7398, 1.1922, 1.4844, 0.8473, 2.555, 1.1205, 0.5499, 1.5286, 1.4766, 0.4604, 0.2323, 0.8986, 0.3384, 1.5372, 0.5048]}, "robust": [{"name": "Main specification (doubly robust)", "n": 1033, "est": 1.271, "lo": -7.5706, "hi": 11.2651}, {"name": "Estimator: regression adjustment", "n": 1033, "est": 1.7525, "lo": -5.0431, "hi": 10.6466}, {"name": "Estimator: entropy balancing", "n": 1033, "est": 1.2693, "lo": -7.103, "hi": 11.1452}, {"name": "Add TypeB-first cohorts (9 cohorts)", "n": 1301, "est": 0.7896, "lo": -7.0806, "hi": 9.542}, {"name": "Outcome: spending excluding fuel", "n": 1033, "est": 0.7816, "lo": -8.1742, "hi": 10.7295}, {"name": "Early cohorts only (weeks 33, 47, 60)", "n": 865, "est": 2.4493, "lo": -7.1484, "hi": 12.7829}, {"name": "Controls: later recipients only (early cohorts)", "n": 865, "est": -0.4562, "lo": -10.0844, "hi": 11.3646}], "power": [{"pct": "0.5%", "usd": 0.2313, "n": 287221}, {"pct": "1%", "usd": 0.4626, "n": 71805}, {"pct": "2%", "usd": 0.9251, "n": 17951}, {"pct": "5%", "usd": 2.3129, "n": 2872}, {"pct": "10%", "usd": 4.6257, "n": 718}]}}</script>
+<script>
+(function () {
+  var D = JSON.parse(document.getElementById('data').textContent);
+  var K = D.k, C = D.charts;
+
+  /* ---------- number formats ---------- */
+  function sign(v) { return v > 0 ? '+' : (v < 0 ? '−' : ''); }
+  function fx(v, d) { return Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  var F = {
+    int: function (v) { return Math.round(v).toLocaleString('en-US'); },
+    num2: function (v) { return v.toFixed(2); },
+    x1: function (v) { return v.toFixed(1); },
+    usd0: function (v) { return '$' + fx(v, 0); },
+    usd1: function (v) { return '$' + fx(v, 1); },
+    usd2: function (v) { return '$' + fx(v, 2); },
+    susd2: function (v) { return sign(v) + '$' + fx(v, 2); },
+    pct0: function (v) { return fx(v * 100, 0) + '%'; },
+    pct1: function (v) { return fx(v * 100, 1) + '%'; },
+    spct0: function (v) { return sign(v) + fx(v, 0) + '%'; },
+    spct1: function (v) { return sign(v) + fx(v, 1) + '%'; },
+    abspct0: function (v) { return fx(v, 0) + '%'; },
+    spp1: function (v) { return sign(v) + fx(v, 1); }
+  };
+  document.querySelectorAll('[data-v]').forEach(function (n) {
+    var v = n.getAttribute('data-v').split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, D);
+    n.textContent = (v == null) ? '—' : F[n.getAttribute('data-f')](v);
+  });
+
+  /* ---------- small SVG helpers ---------- */
+  var NS = 'http://www.w3.org/2000/svg';
+  function S(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function T(parent, x, y, str, attrs) {
+    var e = S('text', Object.assign({ x: x, y: y }, attrs || {}), parent);
+    e.textContent = str;
+    return e;
+  }
+  function H(tag, cls, html, parent) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function ticks(lo, hi, n) {
+    var span = hi - lo, step = Math.pow(10, Math.floor(Math.log10(span / n)));
+    var err = span / n / step;
+    if (err >= 7.5) step *= 10; else if (err >= 3.5) step *= 5; else if (err >= 1.5) step *= 2;
+    var out = [];
+    for (var v = Math.ceil(lo / step - 1e-9) * step; v <= hi + 1e-9; v += step) out.push(Math.round(v / step) * step);
+    return out;
+  }
+  var COL = { 1: 'var(--series-1)', 2: 'var(--series-2)', 3: 'var(--series-3)', n: 'var(--neutral)' };
+
+  /* Every chart: title, note, legend, plot, data table. The plot redraws when its container changes width. */
+  function frame(id, o) {
+    var fig = document.getElementById(id);
+    H('div', 'ctitle', o.title, fig);
+    if (o.sub) H('div', 'csub', o.sub, fig);
+    if (o.legend) {
+      var lg = H('div', 'legend', null, fig);
+      o.legend.forEach(function (l) { H('span', null, '<i class="' + (l.sq ? 'sq' : '') + '" style="background:' + COL[l.c] + '"></i>' + l.name, lg); });
+    }
+    var plot = H('div', 'plot', null, fig);
+    var tip = H('div', 'tip', null, plot); tip.hidden = true;
+    if (o.table) {
+      var d = H('details', 'tbl', null, fig);
+      H('summary', null, 'View the data table', d);
+      var html = '<div class="scroll"><table><thead><tr>' + o.table.head.map(function (h, i) { return '<th class="' + (i ? 'n' : '') + '">' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        o.table.rows.map(function (r) { return '<tr>' + r.map(function (c, i) { return '<td class="' + (i ? 'n' : '') + '">' + c + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+      H('div', null, html, d);
+    }
+    function showTip(x, y, html) { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.max(90, Math.min(plot.clientWidth - 90, x)) + 'px'; tip.style.top = y + 'px'; }
+    function hideTip() { tip.hidden = true; }
+    var last = 0;
+    function draw() {
+      var w = Math.round(plot.clientWidth);
+      if (!w || w === last) return;
+      last = w;
+      var old = plot.querySelector('svg'); if (old) old.remove();
+      var h = o.height(w);
+      var svg = S('svg', { viewBox: '0 0 ' + w + ' ' + h, width: w, height: h, role: 'img', 'aria-label': o.title.replace(/<[^>]+>/g, '') });
+      plot.insertBefore(svg, tip);
+      o.draw(svg, w, h, showTip, hideTip);
+    }
+    draw();
+    if (window.ResizeObserver) new ResizeObserver(draw).observe(plot); else window.addEventListener('resize', draw);
+  }
+
+  /* ---------- line chart ---------- */
+  function lineChart(id, o) {
+    o.height = function (w) { return w < 520 ? 300 : 360; };
+    o.draw = function (svg, w, h, showTip, hideTip) {
+      var narrow = w < 520;
+      var m = { l: 46, r: narrow ? 14 : (o.rightPad || 96), t: 16, b: 44 };
+      var x0 = o.xs[0], x1 = o.xs[o.xs.length - 1], y0 = o.y[0], y1 = o.y[1];
+      var X = function (v) { return m.l + (v - x0) / (x1 - x0) * (w - m.l - m.r); };
+      var Y = function (v) { return h - m.b - (v - y0) / (y1 - y0) * (h - m.t - m.b); };
+      (o.regions || []).forEach(function (r) {
+        S('rect', { x: X(r.x0), y: m.t, width: X(r.x1) - X(r.x0), height: h - m.t - m.b, fill: r.blue ? 'var(--band-a)' : 'var(--band-b)' }, svg);
+        T(svg, (X(r.x0) + X(r.x1)) / 2, o.regionTop ? m.t + 16 : h - m.b - 10, narrow && r.short ? r.short : r.label, { 'text-anchor': 'middle', class: 'rg' });
+      });
+      ticks(y0, y1, 5).forEach(function (v) {
+        S('line', { x1: m.l, x2: w - m.r, y1: Y(v), y2: Y(v), class: (o.zero && v === 0) ? 'axis' : 'grid' }, svg);
+        T(svg, m.l - 8, Y(v) + 4, (o.yfmt || String)(v), { 'text-anchor': 'end' });
+      });
+      S('line', { x1: m.l, x2: w - m.r, y1: h - m.b, y2: h - m.b, class: 'axis' }, svg);
+      (o.xticks || ticks(x0, x1, narrow ? 5 : 8)).forEach(function (v) { T(svg, X(v), h - m.b + 18, String(v).replace('-', '−'), { 'text-anchor': 'middle' }); });
+      T(svg, (m.l + w - m.r) / 2, h - 6, o.xlabel, { 'text-anchor': 'middle' });
+      o.series.forEach(function (s) {
+        if (s.lo) {
+          var up = s.hi.map(function (v, i) { return X(o.xs[i]) + ',' + Y(v); });
+          var dn = s.lo.map(function (v, i) { return X(o.xs[i]) + ',' + Y(v); }).reverse();
+          S('polygon', { points: up.concat(dn).join(' '), fill: COL[s.c], opacity: 0.15 }, svg);
+        }
+      });
+      o.series.forEach(function (s) {
+        var pts = s.y.map(function (v, i) { return v == null ? null : X(o.xs[i]) + ',' + Y(v); }).filter(Boolean);
+        S('polyline', { points: pts.join(' '), fill: 'none', stroke: COL[s.c], 'stroke-width': s.thin ? 1 : 2, opacity: s.thin ? 0.4 : 1, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+        if (!narrow && s.label) T(svg, w - m.r + 8, Y(s.y[s.y.length - 1]) + 4 + (s.dy || 0), s.label, { class: 'dl' });
+      });
+      (o.marks || []).forEach(function (k) {
+        S('line', { x1: X(k.x0), x2: X(k.x1), y1: Y(k.y), y2: Y(k.y), stroke: 'var(--ink)', 'stroke-width': 1.5 }, svg);
+        T(svg, (X(k.x0) + X(k.x1)) / 2, Y(k.y) + (k.below ? 18 : -8), k.text, { 'text-anchor': 'middle', class: 'val' });
+      });
+      var cross = S('line', { y1: m.t, y2: h - m.b, class: 'axis', visibility: 'hidden' }, svg);
+      var main = o.series.filter(function (s) { return !s.thin; });
+      var dots = main.map(function (s) { return S('circle', { r: 4.5, fill: COL[s.c], stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg); });
+      var hit = S('rect', { x: m.l, y: m.t, width: w - m.l - m.r, height: h - m.t - m.b, class: 'hit' }, svg);
+      function move(ev) {
+        var r = svg.getBoundingClientRect(), px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+        var best = 0, bd = 1e9;
+        o.xs.forEach(function (v, i) { var d = Math.abs(X(v) - px); if (d < bd) { bd = d; best = i; } });
+        cross.setAttribute('x1', X(o.xs[best])); cross.setAttribute('x2', X(o.xs[best])); cross.setAttribute('visibility', 'visible');
+        var top = 1e9, html = '<span>' + o.xtip(o.xs[best]) + '</span>';
+        main.forEach(function (s, j) {
+          var v = s.y[best]; if (v == null) { dots[j].setAttribute('visibility', 'hidden'); return; }
+          dots[j].setAttribute('cx', X(o.xs[best])); dots[j].setAttribute('cy', Y(v)); dots[j].setAttribute('visibility', 'visible');
+          top = Math.min(top, Y(v));
+          html += '<br>' + s.name + ' <b>' + (o.vfmt || String)(v) + '</b>' + (s.lo ? ' <span style="opacity:.7">[' + (o.vfmt || String)(s.lo[best]) + ', ' + (o.vfmt || String)(s.hi[best]) + ']</span>' : '');
+        });
+        showTip(X(o.xs[best]), top, html);
+      }
+      function out() { cross.setAttribute('visibility', 'hidden'); dots.forEach(function (d) { d.setAttribute('visibility', 'hidden'); }); hideTip(); }
+      hit.addEventListener('mousemove', move); hit.addEventListener('touchstart', move, { passive: true }); hit.addEventListener('touchmove', move, { passive: true });
+      hit.addEventListener('mouseleave', out); hit.addEventListener('touchend', out);
+    };
+    frame(id, o);
+  }
+
+  /* ---------- vertical bars (optionally grouped) ---------- */
+  function barChart(id, o) {
+    o.height = function (w) { return w < 520 ? 280 : 330; };
+    o.draw = function (svg, w, h, showTip, hideTip) {
+      var m = { l: 46, r: 12, t: 22, b: o.xlabel ? 50 : 34 };
+      var y1 = o.ymax, Y = function (v) { return h - m.b - v / y1 * (h - m.t - m.b); };
+      ticks(0, y1, 4).forEach(function (v) {
+        S('line', { x1: m.l, x2: w - m.r, y1: Y(v), y2: Y(v), class: v === 0 ? 'axis' : 'grid' }, svg);
+        T(svg, m.l - 8, Y(v) + 4, (o.yfmt || String)(v), { 'text-anchor': 'end' });
+      });
+      var n = o.cats.length, k = o.series.length, band = (w - m.l - m.r) / n;
+      var bw = Math.min(o.maxBar || 64, (band * 0.72 - 2 * (k - 1)) / k);
+      o.cats.forEach(function (c, i) {
+        var cx = m.l + band * (i + 0.5), total = bw * k + 2 * (k - 1);
+        o.series.forEach(function (s, j) {
+          var v = s.y[i], x = cx - total / 2 + j * (bw + 2), top = Y(v), ht = Math.max(0.5, h - m.b - top);
+          var r = Math.min(4, ht, bw / 2);
+          var p = S('path', { d: 'M' + x + ',' + (top + ht) + ' V' + (top + r) + ' Q' + x + ',' + top + ' ' + (x + r) + ',' + top + ' H' + (x + bw - r) + ' Q' + (x + bw) + ',' + top + ' ' + (x + bw) + ',' + (top + r) + ' V' + (top + ht) + ' Z', fill: COL[s.c], tabindex: 0 }, svg);
+          if (bw > 26 || k === 1) T(svg, x + bw / 2, top - 7, o.vfmt(v), { 'text-anchor': 'middle', class: 'val' });
+          var tipHtml = '<span>' + (o.tipCat ? o.tipCat(c) : c) + '</span><br>' + (s.name ? s.name + ' ' : '') + '<b>' + o.vfmt(v) + '</b>' + (o.extra ? '<br><span style="opacity:.7">' + o.extra(i, j) + '</span>' : '');
+          var on = function () { showTip(x + bw / 2, top, tipHtml); };
+          p.addEventListener('mouseenter', on); p.addEventListener('focus', on); p.addEventListener('mouseleave', hideTip); p.addEventListener('blur', hideTip);
+        });
+        T(svg, cx, h - m.b + 18, (w < 520 && o.shortCats) ? o.shortCats[i] : c, { 'text-anchor': 'middle' });
+      });
+      if (o.xlabel) T(svg, (m.l + w - m.r) / 2, h - 6, o.xlabel, { 'text-anchor': 'middle' });
+    };
+    frame(id, o);
+  }
+
+  /* ---------- horizontal bars (optionally grouped) ---------- */
+  function hbarChart(id, o) {
+    var k = o.series.length, rowH = k > 1 ? 62 : 44;
+    o.height = function (w) { return o.cats.length * rowH + (w < 560 ? 34 : 14); };
+    o.draw = function (svg, w, h, showTip, hideTip) {
+      var narrow = w < 560, ml = narrow ? 2 : (o.labelW || 150), mr = 96, t0 = narrow ? 20 : 6;
+      var X = function (v) { return ml + v / o.xmax * (w - ml - mr); };
+      var bh = k > 1 ? 16 : 20;
+      o.cats.forEach(function (c, i) {
+        var y = t0 + i * rowH;
+        if (narrow) T(svg, ml, y - 5, c, { class: 'dl' }); else T(svg, ml - 12, y + (k * (bh + 2)) / 2 + 3, c, { 'text-anchor': 'end', class: 'dl' });
+        o.series.forEach(function (s, j) {
+          var v = s.y[i], yy = y + j * (bh + 2), wd = Math.max(1, X(v) - ml), r = Math.min(4, wd, bh / 2);
+          var p = S('path', { d: 'M' + ml + ',' + yy + ' H' + (ml + wd - r) + ' Q' + (ml + wd) + ',' + yy + ' ' + (ml + wd) + ',' + (yy + r) + ' V' + (yy + bh - r) + ' Q' + (ml + wd) + ',' + (yy + bh) + ' ' + (ml + wd - r) + ',' + (yy + bh) + ' H' + ml + ' Z', fill: COL[s.c], tabindex: 0 }, svg);
+          T(svg, ml + wd + 8, yy + bh / 2 + 4.5, o.vfmt(v, i, j), { class: 'val' });
+          var on = function () { showTip(ml + wd / 2, yy, '<span>' + c + '</span><br>' + (s.name ? s.name + ' ' : '') + '<b>' + o.vfmt(v, i, j) + '</b>'); };
+          p.addEventListener('mouseenter', on); p.addEventListener('focus', on); p.addEventListener('mouseleave', hideTip); p.addEventListener('blur', hideTip);
+        });
+      });
+    };
+    frame(id, o);
+  }
+
+  /* ---------- forest plot (point + confidence interval) ---------- */
+  function forest(id, o) {
+    var rowH = 46;
+    o.height = function (w) { return o.rows.length * (w < 700 ? rowH + 14 : rowH) + 52; };
+    o.draw = function (svg, w, h, showTip, hideTip) {
+      var narrow = w < 700, rh = narrow ? rowH + 14 : rowH;
+      var ml = narrow ? 10 : 330, mr = narrow ? 10 : 150, t0 = 8;
+      var X = function (v) { return ml + (v - o.x[0]) / (o.x[1] - o.x[0]) * (w - ml - mr); };
+      var bottom = t0 + o.rows.length * rh;
+      ticks(o.x[0], o.x[1], 4).forEach(function (v) {
+        S('line', { x1: X(v), x2: X(v), y1: t0, y2: bottom, class: v === 0 ? 'axis' : 'grid' }, svg);
+        T(svg, X(v), bottom + 18, F.spct0(v), { 'text-anchor': 'middle' });
+      });
+      T(svg, (ml + w - mr) / 2, bottom + 38, o.xlabel, { 'text-anchor': 'middle' });
+      o.rows.forEach(function (r, i) {
+        var y = t0 + i * rh + (narrow ? 36 : rh / 2), col = i === 0 ? COL[1] : 'var(--neutral)';
+        if (narrow) T(svg, ml, y - 14, r.name, { class: 'dl' }); else T(svg, ml - 14, y + 4, r.name, { 'text-anchor': 'end', class: 'dl' });
+        var lo = Math.max(o.x[0], r.lo), hi = Math.min(o.x[1], r.hi);
+        S('line', { x1: X(lo), x2: X(hi), y1: y, y2: y, stroke: col, 'stroke-width': 2, 'stroke-linecap': 'round' }, svg);
+        var dot = S('circle', { cx: X(r.est), cy: y, r: 5.5, fill: col, stroke: 'var(--surface)', 'stroke-width': 2, tabindex: 0 }, svg);
+        var txt = F.spct1(r.est);
+        if (!narrow) T(svg, w - mr + 14, y + 4, txt + '  [' + F.spct0(r.lo) + ', ' + F.spct0(r.hi) + ']', { class: 'val' });
+        var on = function () { showTip(X(r.est), y - 4, '<span>' + r.name + '</span><br><b>' + txt + '</b> <span style="opacity:.7">[' + F.spct0(r.lo) + ', ' + F.spct0(r.hi) + ']</span><br><span style="opacity:.7">' + F.int(r.n) + ' treated households</span>'); };
+        dot.addEventListener('mouseenter', on); dot.addEventListener('focus', on); dot.addEventListener('mouseleave', hideTip); dot.addEventListener('blur', hideTip);
+      });
+    };
+    frame(id, o);
+  }
+
+  var usd0 = F.usd0, usd1 = F.usd1;
+  function wk(k) { return k === 0 ? 'Week the campaign starts' : (k < 0 ? (-k) + (k === -1 ? ' week before' : ' weeks before') : k + (k === 1 ? ' week after' : ' weeks after')); }
+  function pctr(v) { return Math.round(v) + '%'; }
+
+  /* ---------- 1. first impression ---------- */
+  barChart('c-naive', {
+    title: 'The gap between the two groups was there before any coupon was sent',
+    sub: 'Weekly spending per household ($). Analysis sample of ' + F.int(K.n_sample) + ' households; the first campaign starts in week 33.',
+    legend: [{ c: 1, name: 'Ever received a campaign', sq: 1 }, { c: 2, name: 'Never received a campaign', sq: 1 }],
+    cats: ['Before any campaign (weeks 17–32)', 'After campaigns begin (weeks 33–101)'], shortCats: ['Before', 'After'],
+    series: [{ c: 1, name: 'Ever received', y: [K.treated_before, K.treated_after] }, { c: 2, name: 'Never received', y: [K.never_before, K.never_after] }],
+    ymax: 60, yfmt: usd0, vfmt: usd1, maxBar: 86,
+    table: { head: ['Period', 'Ever received', 'Never received', 'Ratio'], rows: [['Before any campaign', usd1(K.treated_before), usd1(K.never_before), K.ratio_before.toFixed(1)], ['After campaigns begin', usd1(K.treated_after), usd1(K.never_after), K.ratio_after.toFixed(1)]] }
+  });
+
+  /* ---------- 2. selection rule ---------- */
+  var sel = C.selection;
+  barChart('c-selection', {
+    title: 'The more often a household came in, the likelier it got a coupon',
+    sub: 'Households grouped by the number of weeks they shopped in weeks 35–43; share of each group that received the campaign starting in week 60.',
+    cats: sel.weeks.map(String), series: [{ c: 1, name: '', y: sel.p.map(function (v) { return v * 100; }) }],
+    ymax: 100, yfmt: function (v) { return v + '%'; }, vfmt: pctr,
+    xlabel: 'Weeks with a shopping trip, out of weeks 35–43', tipCat: function (c) { return 'Shopped in ' + c + ' of 9 weeks'; },
+    extra: function (i) { return F.int(sel.n[i]) + ' households in this group'; },
+    table: { head: ['Weeks with a trip', 'Households', 'Share receiving the campaign'], rows: sel.weeks.map(function (wv, i) { return [wv, F.int(sel.n[i]), pctr(sel.p[i] * 100)]; }) }
+  });
+
+  /* ---------- 3. regression to the mean ---------- */
+  var mr = C.mean_reversion;
+  lineChart('c-meanrev', {
+    title: 'Spending peaks when these households are chosen, and falls back before the campaign',
+    sub: 'The ' + F.int(mr.n) + ' households whose first campaign starts in week 60; weekly spending per household ($). Thin line: weekly mean. Thick line: 3-week moving average. Horizontal lines: period averages.',
+    xs: mr.weeks, y: [36, 58], yfmt: usd0, vfmt: usd1, xlabel: 'Week', xtip: function (v) { return 'Week ' + v; }, rightPad: 16, regionTop: true,
+    regions: [{ x0: 35, x1: 43, label: 'selection window', short: 'selection' }, { x0: 60, x1: 66, label: 'campaign', blue: 1 }],
+    series: [{ c: 1, name: 'Weekly mean', y: mr.weekly, thin: 1 }, { c: 1, name: '3-week average', y: mr.smooth }],
+    marks: [{ x0: 35, x1: 43, y: K.mr_sel, text: usd1(K.mr_sel) }, { x0: 44, x1: 59, y: K.mr_between, text: usd1(K.mr_between) }, { x0: 60, x1: 66, y: K.mr_camp, text: usd1(K.mr_camp), below: 1 }],
+    table: { head: ['Period', 'Weekly spending per household'], rows: [['Selection window (weeks 35–43)', usd1(K.mr_sel)], ['After selection, before the campaign (weeks 44–59)', usd1(K.mr_between)], ['During the campaign (weeks 60–66)', usd1(K.mr_camp)]] }
+  });
+
+  /* ---------- 4. two lines ---------- */
+  var lv = C.levels, REG = [{ x0: -8.5, x1: -0.5, label: 'check window', short: 'check' }, { x0: -0.5, x1: 6.5, label: 'campaign', blue: 1 }];
+  lineChart('c-levels', {
+    title: 'After weighting, controls and recipients move together before and after the campaign',
+    sub: 'Weekly spending per household ($). Five cohorts of first-time recipients, ' + F.int(K.n_treated) + ' households, aligned on the week their campaign starts.',
+    legend: [{ c: 1, name: 'Coupon recipients' }, { c: 2, name: 'Controls (weighted)' }, { c: 'n', name: 'Controls (unweighted)' }],
+    xs: lv.ks, y: [0, 60], yfmt: usd0, vfmt: usd1, xlabel: 'Weeks relative to campaign start', xtip: wk, regions: REG, rightPad: 140,
+    series: [{ c: 'n', name: 'Controls (unweighted)', y: lv.control_raw, label: 'Controls (unweighted)' }, { c: 2, name: 'Controls (weighted)', y: lv.control_balanced, label: 'Controls (weighted)', dy: 14 }, { c: 1, name: 'Recipients', y: lv.treated, label: 'Recipients', dy: -8 }],
+    table: { head: ['Week', 'Recipients', 'Controls (weighted)', 'Controls (unweighted)'], rows: lv.ks.map(function (k, i) { return [String(k).replace('-', '−'), usd1(lv.treated[i]), usd1(lv.control_balanced[i]), usd1(lv.control_raw[i])]; }) }
+  });
+
+  /* ---------- 5. event study ---------- */
+  var ev = C.event, sd = function (v) { return sign(v) + '$' + Math.abs(v).toFixed(1); };
+  lineChart('c-event', {
+    title: 'The weighted effect hovers around zero; the unadjusted one slides before the campaign',
+    sub: 'Effect on weekly spending ($). The band is the 95% confidence interval of the weighted estimate.',
+    legend: [{ c: 1, name: 'Weighted (main estimate)' }, { c: 2, name: 'Unadjusted (plain difference-in-differences)' }],
+    xs: ev.ks, y: [-18, 18], zero: true, yfmt: function (v) { return sign(v) + '$' + Math.abs(v); }, vfmt: sd,
+    xlabel: 'Weeks relative to campaign start', xtip: wk, regions: REG, rightPad: 16,
+    series: [{ c: 2, name: 'Unadjusted', y: ev.did }, { c: 1, name: 'Weighted', y: ev.dr, lo: ev.dr_lo, hi: ev.dr_hi }],
+    table: { head: ['Week', 'Weighted', '95% low', '95% high', 'Unadjusted'], rows: ev.ks.map(function (k, i) { return [String(k).replace('-', '−'), sd(ev.dr[i]), sd(ev.dr_lo[i]), sd(ev.dr_hi[i]), sd(ev.did[i])]; }) }
+  });
+
+  /* ---------- 6. funnel ---------- */
+  hbarChart('c-funnel', {
+    title: 'Only 1 mailing in 8 was ever used',
+    sub: 'Mailings sent and households reached over two years. One mailing is one household receiving one campaign.',
+    cats: ['Mailings sent', '…with at least one redemption', 'Households that received a campaign', '…that ever redeemed'],
+    series: [{ c: 1, name: '', y: [K.n_mailings, K.mailings_redeemed, K.n_recipients, K.n_redeemers] }],
+    xmax: K.n_mailings, labelW: 250,
+    vfmt: function (v, i) { return F.int(v) + (i === 1 ? ' (' + F.pct0(K.mailing_rate) + ')' : (i === 3 ? ' (' + F.pct0(1 - K.never_redeemed) + ')' : '')); },
+    table: { head: ['', 'Count'], rows: [['Mailings sent', F.int(K.n_mailings)], ['…with at least one redemption', F.int(K.mailings_redeemed)], ['Households that received a campaign', F.int(K.n_recipients)], ['…that ever redeemed', F.int(K.n_redeemers)]] }
+  });
+
+  /* ---------- 7. who redeems ---------- */
+  var q = C.quintiles;
+  barChart('c-who', {
+    title: 'The more a household already buys, the likelier it uses a coupon',
+    sub: 'Recipient households in five equal groups by spending before any campaign; share of each group that ever redeemed a coupon.',
+    cats: q.map(function (r) { return r.label; }), shortCats: ['Low', '', 'Mid', '', 'High'], series: [{ c: 1, name: '', y: q.map(function (r) { return r.share * 100; }) }],
+    ymax: 60, yfmt: function (v) { return v + '%'; }, vfmt: pctr,
+    xlabel: 'Spending before any campaign', extra: function (i) { return usd0(q[i].spend) + ' a week before campaigns, ' + F.int(q[i].n) + ' households'; }, maxBar: 78,
+    table: { head: ['Group', 'Households', 'Weekly spending before campaigns', 'Share that redeemed'], rows: q.map(function (r) { return [r.label, F.int(r.n), usd0(r.spend), pctr(r.share * 100)]; }) }
+  });
+
+  /* ---------- 8. what was bought ---------- */
+  var hb = C.habit;
+  hbarChart('c-habit', {
+    title: F.pct0(K.habit_same_subcat) + ' of redeemed items are in a sub-category the household bought in the last six months',
+    sub: 'Had the household bought it in the 26 weeks before the campaign? Redeemed items against what the same households bought without a coupon in the same weeks.',
+    legend: [{ c: 1, name: 'Bought with a coupon', sq: 1 }, { c: 2, name: 'Bought without a coupon, same weeks', sq: 1 }],
+    cats: hb.cats, series: [{ c: 1, name: 'With a coupon', y: hb.redeemed.map(function (v) { return v * 100; }) }, { c: 2, name: 'Without a coupon', y: hb.ordinary.map(function (v) { return v * 100; }) }],
+    xmax: 56, labelW: 240, vfmt: pctr,
+    table: { head: ['Bought in the last six months?', 'With a coupon', 'Without a coupon'], rows: hb.cats.map(function (c, i) { return [c, pctr(hb.redeemed[i] * 100), pctr(hb.ordinary[i] * 100)]; }) }
+  });
+
+  /* ---------- 9. promoted-product share ---------- */
+  var sh = C.share, pp = function (v) { return sign(v) + Math.abs(v).toFixed(1); };
+  lineChart('c-share', {
+    title: 'The share of spending going to promoted products did not rise once the campaign began',
+    sub: 'Change in recipients\' share minus the change among households not sent the campaign (percentage points). Five large campaigns; the band is the 95% confidence interval.',
+    xs: sh.ks, y: [-3, 3], zero: true, yfmt: pp, vfmt: pp, xlabel: 'Weeks relative to campaign start', xtip: wk, rightPad: 16,
+    regions: [{ x0: -0.5, x1: 6.5, label: 'campaign', blue: 1 }],
+    series: [{ c: 1, name: 'Change in share', y: sh.ddd, lo: sh.lo, hi: sh.hi }],
+    table: { head: ['Week', 'Change in share (pp)', '95% low', '95% high'], rows: sh.ks.map(function (k, i) { return [String(k).replace('-', '−'), pp(sh.ddd[i]), pp(sh.lo[i]), pp(sh.hi[i])]; }) }
+  });
+
+  /* ---------- 10. robustness ---------- */
+  forest('c-robust', {
+    title: 'The effect on weekly spending during the campaign is close to zero under every approach',
+    sub: 'Dot: estimate. Line: 95% confidence interval. Units: percent of baseline spending. Blue is the main specification.',
+    rows: C.robust, x: [-20, 20], xlabel: 'Percent of baseline weekly spending',
+    table: { head: ['Approach', 'Treated households', 'Effect', '95% confidence interval'], rows: C.robust.map(function (r) { return [r.name, F.int(r.n), F.spct1(r.est), '[' + F.spct0(r.lo) + ', ' + F.spct0(r.hi) + ']']; }) }
+  });
+
+  /* ---------- 11. sample size needed ---------- */
+  document.querySelector('#t-power tbody').innerHTML = C.power.map(function (r) {
+    return '<tr><td>' + r.pct + '</td><td class="n">$' + r.usd.toFixed(2) + '</td><td class="n">' + F.int(r.n) + '</td></tr>';
+  }).join('');
+})();
+</script>
+
+</body>
+</html>

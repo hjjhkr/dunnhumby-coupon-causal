@@ -1,0 +1,24 @@
+<section id="method" class="padfoot" data-transition="fade">
+<p class="eyebrow">APPENDIX</p>
+<h2>Method and limitations</h2>
+<div class="row">
+<div class="col">
+<p class="tag">SAMPLE</p>
+<p class="note">The first 16 weeks are a data ramp-up. Outcomes use weeks 17–101; the 2,269 households present by week 16 are kept.</p>
+<p class="tag">TREATED AND CONTROLS</p>
+<p class="note">Five cohorts receiving a large campaign for the first time: 1,033 households. Controls have no campaign by week 12 after the start.</p>
+<p class="tag">WEIGHTING</p>
+<p class="note">Entropy balancing matches controls to the treated on spending, trips and visit frequency in four pre-campaign periods (12 measures).</p>
+</div>
+<div class="col">
+<p class="tag">ESTIMATOR</p>
+<p class="note">Doubly robust: weighting, then regression adjustment. Regression alone gives +1.8%; weighting alone +1.3%.</p>
+<p class="tag">CONFIDENCE INTERVALS</p>
+<p class="note">Household-level bootstrap, 1,000 replications, redoing the weighting and regression each time.</p>
+<p class="tag">LIMITATIONS</p>
+<p class="note">Not a randomized experiment. It assumes households with the same pre-campaign records would have followed the same path without coupons. The check window supports this but cannot prove it.</p>
+</div>
+</div>
+<p class="foot">The full analysis is in coupon_causal_analysis.ipynb and runs end to end from the raw data.</p>
+<div class="pg"></div>
+</section>
