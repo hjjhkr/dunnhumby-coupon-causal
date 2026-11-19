@@ -17,6 +17,7 @@ Final project for a Causal Modeling course. Using dunnhumby's "The Complete Jour
 |---|---|
 | `coupon_causal_analysis.ipynb` | **The core deliverable.** The whole analysis, commented step by step, with all figures and results |
 | `deliverables/report.html` | Interactive web report: contents rail, causal-graph explorer, method filter, sample-size calculator (open it in a browser) |
+| `deliverables/Do Coupons Create Sales - slides.html` | The 30-slide deck as one self-contained page; open it from disk, arrow keys move between slides |
 | `deliverables/Do Coupons Create Sales - slides.pptx` | The 30-slide deck as PowerPoint (one image per slide, slide text in the speaker notes) |
 | `deliverables/slides/` | Source files of the slide deck (30 slides, 7 of them appendix) |
 | `report/` | Template and build script that turn the notebook's results into the web report |
