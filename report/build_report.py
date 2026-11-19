@@ -135,10 +135,11 @@ if missing:
     sys.exit(f"The template refers to numbers that do not exist: {missing}")
 
 body = template.replace("__DATA__", json.dumps(DATA, ensure_ascii=False).replace("</", "<\\/"))
-head, rest = body.split('<div class="wrap">', 1)
+head, rest = body.split("</style>", 1)            # everything up to the page's own stylesheet goes in <head>
 standalone = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
-              '<meta name="viewport" content="width=device-width, initial-scale=1">\n<style>body{margin:0}</style>\n'
-              + head + '</head>\n<body>\n<div class="wrap">' + rest + '\n</body>\n</html>\n')
+              '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+              '<style>body{margin:0} [hidden]{display:none!important} img{max-width:100%}</style>\n'
+              + head + '</style>\n</head>\n<body>' + rest + '\n</body>\n</html>\n')
 out = ROOT / "deliverables" / "report.html"
 out.parent.mkdir(exist_ok=True)
 out.write_text(standalone, encoding="utf-8")
