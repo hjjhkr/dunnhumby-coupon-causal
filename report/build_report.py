@@ -10,6 +10,7 @@ Run:  .venv\\Scripts\\python.exe report\\build_report.py
 """
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -136,6 +137,11 @@ if missing:
 
 body = template.replace("__DATA__", json.dumps(DATA, ensure_ascii=False).replace("</", "<\\/"))
 head, rest = body.split("</style>", 1)            # everything up to the page's own stylesheet goes in <head>
+# The standalone file must work as a single file anywhere, including viewers that block the network or
+# never run JavaScript (chat apps' file previews). So: fonts are embedded, and the page is opened once in
+# headless Chrome and saved after its script has filled in every number and drawn every chart.
+fonts = (ROOT / "report" / "fonts.css").read_text(encoding="utf-8")
+head = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', "<style>\n" + fonts + "</style>", head)
 standalone = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
               '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
               '<style>body{margin:0} [hidden]{display:none!important} img{max-width:100%}</style>\n'
@@ -143,6 +149,19 @@ standalone = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">
 out = ROOT / "deliverables" / "report.html"
 out.parent.mkdir(exist_ok=True)
 out.write_text(standalone, encoding="utf-8")
+
+CHROME = Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+if CHROME.exists():
+    dom = subprocess.run([str(CHROME), "--headless=new", "--disable-gpu", "--force-prefers-reduced-motion",
+                          "--window-size=1300,900", "--virtual-time-budget=10000", "--dump-dom", out.as_uri()],
+                         capture_output=True, timeout=180, check=True).stdout.decode("utf-8")
+    if 'id="c-naive"' not in dom or "<svg" not in dom:
+        sys.exit("Pre-rendering failed: the saved page has no charts")
+    dom = re.sub(r'(<div class="tabbody" id="t-like"[^>]*?) hidden=""', r"\1", dom)   # without a script both tabs show
+    out.write_text("<!doctype html>\n" + dom, encoding="utf-8")
+    print("Pre-rendered numbers and charts into", out.name)
+else:
+    print("Chrome not found: the standalone report needs JavaScript to show numbers and charts")
 (ROOT / "outputs" / "key_numbers.json").write_text(json.dumps(K, ensure_ascii=False, indent=1), encoding="utf-8")
 if len(sys.argv) > 1:
     Path(sys.argv[1]).write_text(body, encoding="utf-8")
