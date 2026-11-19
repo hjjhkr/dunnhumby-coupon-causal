@@ -21,6 +21,7 @@ Final project for a Causal Modeling course. Using dunnhumby's "The Complete Jour
 | `report/` | Template and build script that turn the notebook's results into the web report |
 | `outputs/figures/`, `outputs/tables/` | Figures and tables written by the notebook |
 | `outputs/results.json` | Every number quoted in the report and the slides |
+| `TEAM_PLAN.md` | How four people split the slides, further research, talk and Q&A |
 | `data/raw/` | The 8 raw CSV files (not in the repository, see below) |
 
 ## Method in one paragraph
