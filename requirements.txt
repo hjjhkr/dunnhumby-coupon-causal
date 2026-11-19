@@ -2,7 +2,12 @@ pandas
 numpy
 scipy
 scikit-learn
+statsmodels
 matplotlib
+networkx
+dowhy
+econml
+pgmpy
 ipykernel
 nbformat
 nbclient

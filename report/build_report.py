@@ -63,6 +63,28 @@ K = dict(
     sd_change=R["power"]["sd_change"], mde_pct=R["power"]["mde_pct"], n_for_1pct=n_1pct, n_for_1pct_k=round(n_1pct / 1000),
 )
 
+# ---- numbers from the course-framework sections
+tk = R["toolkit"]
+tk_rows = {r["method"]: r for r in tk["table"]}
+adjusted = [r for r in tk["table"] if r["method"] != "Raw difference in means"]
+design = {r["outcome analysed"]: r for r in R["design"]["table"]}
+nocheck = next(r for r in R["robustness"]["table"] if r["check"].startswith("No check window"))
+K.update(
+    strata_gap=R["strata"]["overall_gap"], strata_top_gap=R["strata"]["table"][-1]["gap"], strata_adj50=R["strata"]["adjustment_formula_50_cells"],
+    ancova=R["ols_view"]["ancova"], ancova_lo=R["ols_view"]["ancova_lo"], ancova_hi=R["ols_view"]["ancova_hi"],
+    toolkit_n=len(adjusted), toolkit_clean_n=len(tk["clean"]), toolkit_clean_min=tk["clean_min"], toolkit_clean_max=tk["clean_max"],
+    toolkit_clean_min_pct=100 * tk["clean_min"] / tk["base"], toolkit_clean_max_pct=100 * tk["clean_max"] / tk["base"],
+    toolkit_diff_min=tk["diff_min"], toolkit_diff_max=tk["diff_max"], toolkit_raw=tk_rows["Raw difference in means"]["campaign"],
+    iptw_placebo=tk_rows["Inverse probability weighting (ATT)"]["placebo"], ps_ess=R["propensity"]["ess_iptw"],
+    design_n_level=design["Spending level"]["per group, 1% lift"], design_n_ancova=design["ANCOVA on pre-campaign measures"]["per group, 1% lift"],
+    design_total_2pct=design["ANCOVA on pre-campaign measures"]["total with 10% holdout, 2% lift"],
+    iv_first_stage=R["iv"]["first_stage"], iv_late=R["iv"]["late"], iv_lo=R["iv"]["late_lo"], iv_hi=R["iv"]["late_hi"],
+    attr_share=R["attribution"]["excess_fraction"], attr_hi=R["attribution"]["excess_hi"],
+    bn_raw_no=R["bayes_net"]["raw_p_high"]["no"], bn_raw_yes=R["bayes_net"]["raw_p_high"]["yes"],
+    bn_p_no=R["bayes_net"]["p_high_given_coupon"]["no"], bn_p_yes=R["bayes_net"]["p_high_given_coupon"]["yes"],
+    nocheck_pct=nocheck["during"], nocheck_lo=nocheck["during_lo"], nocheck_hi=nocheck["during_hi"],
+)
+
 c8 = R["selection"]["campaign8"]
 weeks8 = sorted(int(k) for k in c8["p_by_active_weeks"])
 robust = [dict(name=r["check"], n=r["treated"], est=r["during"], lo=r["during_lo"], hi=r["during_hi"])
@@ -80,6 +102,10 @@ CHARTS = dict(
     share=dict(ks=ps_a["ks"], ddd=ps_a["ddd"], lo=ps_a["lo"], hi=ps_a["hi"]),
     robust=robust,
     power=[dict(pct=r["lift"], usd=r["usd_per_week"], n=r["households_per_group"]) for r in power],
+    strata=[dict(label=r["activity"], treated=r["spend_treated"], control=r["spend_control"], n_treated=r["n_treated"], n_control=r["n_control"])
+            for r in R["strata"]["table"]],
+    toolkit=[dict(name=r["method"], placebo=r["placebo"], campaign=r["campaign"], lo=r["lo"], hi=r["hi"]) for r in adjusted],
+    cate=[dict(name=r["tier"], n=r["households"], base=r["baseline_spend"], est=r["cate"], lo=r["lo"], hi=r["hi"]) for r in R["cate"]["table"]],
 )
 
 

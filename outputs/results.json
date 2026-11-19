@@ -364,6 +364,65 @@
    43.69253174603173
   ]
  },
+ "strata": {
+  "overall_gap": 25.60273547080028,
+  "adjustment_formula_50_cells": 3.168393326599638,
+  "table": [
+   {
+    "activity": "0 weeks",
+    "n_control": 1259,
+    "n_treated": 6,
+    "spend_control": 6.827147395892432,
+    "spend_treated": 2.8649999999999998,
+    "gap": -3.962147395892432
+   },
+   {
+    "activity": "1-2",
+    "n_control": 1852,
+    "n_treated": 83,
+    "spend_control": 11.255128818265968,
+    "spend_treated": 24.21989672977625,
+    "gap": 12.96476791151028
+   },
+   {
+    "activity": "3-4",
+    "n_control": 1343,
+    "n_treated": 191,
+    "spend_control": 18.672145516434423,
+    "spend_treated": 28.492228870605835,
+    "gap": 9.820083354171413
+   },
+   {
+    "activity": "5-6",
+    "n_control": 916,
+    "n_treated": 312,
+    "spend_control": 30.115837492202118,
+    "spend_treated": 39.73499542124542,
+    "gap": 9.619157929043304
+   },
+   {
+    "activity": "7-8",
+    "n_control": 756,
+    "n_treated": 441,
+    "spend_control": 62.37489984882843,
+    "spend_treated": 64.34708778749595,
+    "gap": 1.972187938667524
+   }
+  ]
+ },
+ "graph_test": {
+  "pseudo_r2_window": 0.4619970107675868,
+  "pseudo_r2_all": 0.4796465521292219,
+  "lr_chi2": 31.648982771394685,
+  "lr_p": 6.205184860184643e-07,
+  "dowhy_summary": "+-------------------------------------------------------------------------------------------------------+\n|                                         Falsification Summary                                         |\n+-------------------------------------------------------------------------------------------------------+\n| The given DAG is informative because 0 / 20 of the permutations lie in the Markov                     |\n| equivalence class of the given DAG (p-value: 0.00).                                                   |\n| The given DAG violates 2/3 LMCs and is better than 90.0% of the permuted DAGs (p-value: 0.10).        |\n| Based on the provided significance level (0.05) and because the DAG is informative,                   |\n| we reject the DAG.                                                                                    |\n+-------------------------------------------------------------------------------------------------------+",
+  "dowhy_falsified": true,
+  "check_pseudo_r2": 0.4393321616502627,
+  "check_pseudo_r2_plus": 0.4453049759597928,
+  "check_lr": 35.29207049616616,
+  "check_p": 2.837851308690061e-09,
+  "check_coef": 0.311599931990993
+ },
  "balance": {
   "smd_raw_mean": 1.0841750064784543,
   "smd_raw_max": 2.3693278602836436,
@@ -1530,6 +1589,421 @@
    }
   ]
  },
+ "ols_view": {
+  "dummy": 25.754323711212812,
+  "ancova": 0.9028416100061448,
+  "ancova_lo": -1.5752926098268172,
+  "ancova_hi": 3.3809758298391066,
+  "ancova_placebo": 0.20755876524778794,
+  "r2_dummy": 0.0928071933127439,
+  "r2_ancova": 0.6240941819007921,
+  "raw_corr": 0.2443527697799575,
+  "partial_corr": 0.011454690227823893,
+  "vif_min": 3.7553192358807976,
+  "vif_max": 8.145259285554738,
+  "f_interaction": 8.376440388582832,
+  "p_interaction": 5.863762519374339e-16,
+  "base": 46.2572894482091
+ },
+ "propensity": {
+  "median_treated": 0.53861365270524,
+  "median_control": 0.019779432252385754,
+  "controls_above_02": 779,
+  "n_controls": 6126,
+  "ess_iptw": 190.85711023004328,
+  "hist_bins": [
+   0.0,
+   0.04,
+   0.08,
+   0.12,
+   0.16,
+   0.2,
+   0.24,
+   0.28,
+   0.32,
+   0.36,
+   0.4,
+   0.44,
+   0.48,
+   0.52,
+   0.56,
+   0.6,
+   0.64,
+   0.68,
+   0.72,
+   0.76,
+   0.8,
+   0.84,
+   0.88,
+   0.92,
+   0.96,
+   1.0
+  ],
+  "hist_treated": [
+   0.03388189738625363,
+   0.03969022265246854,
+   0.031945788964181994,
+   0.03581800580832527,
+   0.04065827686350436,
+   0.036786060019361085,
+   0.0377541142303969,
+   0.04356243949661181,
+   0.03388189738625363,
+   0.03388189738625363,
+   0.036786060019361085,
+   0.04356243949661181,
+   0.03388189738625363,
+   0.05227492739593417,
+   0.031945788964181994,
+   0.05033881897386254,
+   0.046466602129719266,
+   0.05614714424007745,
+   0.030977734753146177,
+   0.041626331074540175,
+   0.04743465634075508,
+   0.061955469506292354,
+   0.05614714424007745,
+   0.03484995159728945,
+   0.007744433688286544
+  ],
+  "hist_control": [
+   0.6374469474371531,
+   0.11916421808684297,
+   0.05713352921971923,
+   0.036891936010447275,
+   0.02220045706823376,
+   0.024322559582109042,
+   0.015181194906953967,
+   0.013385569702905649,
+   0.01110022853411688,
+   0.009631080639895527,
+   0.00881488736532811,
+   0.00652954619653934,
+   0.006692784851452824,
+   0.005060398302317989,
+   0.0037544890630101207,
+   0.004080966372837088,
+   0.00326477309826967,
+   0.001305909239307868,
+   0.003101534443356187,
+   0.00277505713352922,
+   0.0014691478942213516,
+   0.001632386549134835,
+   0.002448579823702253,
+   0.002285341168788769,
+   0.000326477309826967
+  ]
+ },
+ "dowhy": {
+  "estimates": {
+   "DoWhy: linear regression": 0.9028416100059751,
+   "DoWhy: PS stratification": -7.086679364228335,
+   "DoWhy: PS matching": -6.028859078965565,
+   "DoWhy: PS weighting": -4.907700081631845
+  },
+  "placebo": {
+   "DoWhy: linear regression": 0.20755876524761874,
+   "DoWhy: PS stratification": -6.165925971164535,
+   "DoWhy: PS matching": -6.200834946757019,
+   "DoWhy: PS weighting": -5.424408613115517
+  },
+  "refutations": [
+   {
+    "refuter": "Placebo treatment (shuffle who was treated)",
+    "original_estimate": 0.9028416100059751,
+    "new_estimate": -0.13947444394087655,
+    "p_value": 0.4280850486924902
+   },
+   {
+    "refuter": "Add a random common cause",
+    "original_estimate": 0.9028416100059751,
+    "new_estimate": 0.9034617862366596,
+    "p_value": 0.4764243780825865
+   },
+   {
+    "refuter": "Re-estimate on random 80% subsets",
+    "original_estimate": 0.9028416100059751,
+    "new_estimate": 0.943608572402423,
+    "p_value": 0.4732810954919649
+   }
+  ]
+ },
+ "toolkit": {
+  "base": 46.2572894482091,
+  "n_rows": 7159,
+  "n_treated": 1033,
+  "n_matched": 1031,
+  "table": [
+   {
+    "method": "Raw difference in means",
+    "family": "No adjustment",
+    "placebo": 25.932092530519945,
+    "placebo_lo": 23.152079844267014,
+    "placebo_hi": 28.495406484799183,
+    "campaign": 25.60273547080028,
+    "lo": 22.89367494184835,
+    "hi": 28.27715164130817,
+    "ci": "household bootstrap",
+    "campaign_pct": 55.34854241614349,
+    "placebo_pct": 56.06055356865259,
+    "campaign_minus_placebo": -0.32935705971966556,
+    "placebo_size": "more than $2"
+   },
+   {
+    "method": "ANCOVA (OLS with covariates)",
+    "family": "Regression (Weeks 1, 3)",
+    "placebo": 0.20755876524768496,
+    "placebo_lo": -1.752320087727622,
+    "placebo_hi": 2.5468776849605024,
+    "campaign": 0.9028416100060327,
+    "lo": -1.69437707207637,
+    "hi": 3.2266035878787287,
+    "ci": "household bootstrap",
+    "campaign_pct": 1.9517823477678653,
+    "placebo_pct": 0.4487049883890696,
+    "campaign_minus_placebo": 0.6952828447583477,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "PS matching (caliper 0.2 SD)",
+    "family": "Propensity score (Weeks 3-5)",
+    "placebo": -1.4382589718719683,
+    "placebo_lo": -9.0498066244621,
+    "placebo_hi": 6.16854292016113,
+    "campaign": -3.649502563391992,
+    "lo": -10.025310091081334,
+    "hi": 6.3052497853244995,
+    "ci": "household bootstrap",
+    "campaign_pct": -7.889572880136162,
+    "placebo_pct": -3.109259079009118,
+    "campaign_minus_placebo": -2.2112435915200237,
+    "placebo_size": "$1 to $2"
+   },
+   {
+    "method": "PS stratification (quintiles)",
+    "family": "Propensity score (Weeks 3-5)",
+    "placebo": -1.6551886658814,
+    "placebo_lo": -4.603124505976906,
+    "placebo_hi": 3.5363700614009113,
+    "campaign": -1.923929941929092,
+    "lo": -5.051230674248951,
+    "hi": 3.3253303953351887,
+    "ci": "household bootstrap",
+    "campaign_pct": -4.159192993967309,
+    "placebo_pct": -3.5782223420907386,
+    "campaign_minus_placebo": -0.26874127604769216,
+    "placebo_size": "$1 to $2"
+   },
+   {
+    "method": "Inverse probability weighting (ATT)",
+    "family": "Propensity score (Weeks 3-5)",
+    "placebo": -7.973020751668209,
+    "placebo_lo": -21.10662453856867,
+    "placebo_hi": -1.4116562655016085,
+    "campaign": -6.98731139103667,
+    "lo": -20.007609939072445,
+    "hi": -0.3781256396708717,
+    "ci": "household bootstrap",
+    "campaign_pct": -15.105319560195696,
+    "placebo_pct": -17.23624718779732,
+    "campaign_minus_placebo": 0.9857093606315388,
+    "placebo_size": "more than $2"
+   },
+   {
+    "method": "Covariate adjustment with the PS",
+    "family": "Propensity score (Weeks 3-5)",
+    "placebo": 0.2631737288622733,
+    "placebo_lo": -2.072342695311243,
+    "placebo_hi": 2.7535415708909405,
+    "campaign": 0.6481109056029455,
+    "lo": -1.830843505214037,
+    "hi": 3.279560803679123,
+    "ci": "household bootstrap",
+    "campaign_pct": 1.401100050033385,
+    "placebo_pct": 0.5689346090132015,
+    "campaign_minus_placebo": 0.3849371767406722,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "S-learner (linear)",
+    "family": "Meta-learner (Week 7)",
+    "placebo": 0.20755876524763373,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 0.9028416100059697,
+    "lo": null,
+    "hi": null,
+    "ci": "none",
+    "campaign_pct": 1.9517823477677296,
+    "placebo_pct": 0.44870498838895884,
+    "campaign_minus_placebo": 0.695282844758336,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "S-learner (gradient boosting)",
+    "family": "Meta-learner (Week 7)",
+    "placebo": 0.28038055193283884,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 1.2923485200274138,
+    "lo": null,
+    "hi": null,
+    "ci": "none",
+    "campaign_pct": 2.7938267361609284,
+    "placebo_pct": 0.6061326880096605,
+    "campaign_minus_placebo": 1.011967968094575,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "T-learner (linear)",
+    "family": "Meta-learner (Week 7)",
+    "placebo": 0.17313754969819276,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 0.5427078283738196,
+    "lo": null,
+    "hi": null,
+    "ci": "none",
+    "campaign_pct": 1.1732374180321348,
+    "placebo_pct": 0.37429246668688226,
+    "campaign_minus_placebo": 0.36957027867562686,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "T-learner (gradient boosting)",
+    "family": "Meta-learner (Week 7)",
+    "placebo": 1.909059507308654,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 2.3934459930906122,
+    "lo": null,
+    "hi": null,
+    "ci": "none",
+    "campaign_pct": 5.174202858925356,
+    "placebo_pct": 4.12704576961019,
+    "campaign_minus_placebo": 0.4843864857819582,
+    "placebo_size": "$1 to $2"
+   },
+   {
+    "method": "X-learner (gradient boosting)",
+    "family": "Meta-learner (Week 7)",
+    "placebo": 2.030106659924681,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 2.7123711606061884,
+    "lo": null,
+    "hi": null,
+    "ci": "none",
+    "campaign_pct": 5.863662123227155,
+    "placebo_pct": 4.388728099162929,
+    "campaign_minus_placebo": 0.6822645006815073,
+    "placebo_size": "more than $2"
+   },
+   {
+    "method": "Double ML (gradient boosting)",
+    "family": "Orthogonal / doubly robust ML (Week 7)",
+    "placebo": 0.9791233717728308,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 0.8672229791334808,
+    "lo": -1.923488528338729,
+    "hi": 3.65793448660569,
+    "ci": "EconML (rows treated as independent)",
+    "campaign_pct": 1.8747812279499143,
+    "placebo_pct": 2.1166898956954308,
+    "campaign_minus_placebo": -0.11190039263935003,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "Double ML (lasso)",
+    "family": "Orthogonal / doubly robust ML (Week 7)",
+    "placebo": -0.18267189908155992,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 0.2146528279590047,
+    "lo": -2.4187501745702575,
+    "hi": 2.848055830488266,
+    "ci": "EconML (rows treated as independent)",
+    "campaign_pct": 0.46404108524200444,
+    "placebo_pct": -0.3949040275826889,
+    "campaign_minus_placebo": 0.39732472704056465,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "Doubly robust learner",
+    "family": "Orthogonal / doubly robust ML (Week 7)",
+    "placebo": -0.563468918383977,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": -0.14999534167387535,
+    "lo": -6.724164345915031,
+    "hi": 6.424173662567279,
+    "ci": "EconML (rows treated as independent)",
+    "campaign_pct": -0.32426314525371003,
+    "placebo_pct": -1.2181191874955228,
+    "campaign_minus_placebo": 0.4134735767101016,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "Causal forest",
+    "family": "Orthogonal / doubly robust ML (Week 7)",
+    "placebo": 0.8545721638503644,
+    "placebo_lo": null,
+    "placebo_hi": null,
+    "campaign": 0.6633022331010815,
+    "lo": -7.002284704234932,
+    "hi": 8.328889170437094,
+    "ci": "EconML (rows treated as independent)",
+    "campaign_pct": 1.433940987492863,
+    "placebo_pct": 1.847432424260756,
+    "campaign_minus_placebo": -0.1912699307492829,
+    "placebo_size": "within $1"
+   },
+   {
+    "method": "Balancing weights + regression (Section 7)",
+    "family": "This project's main estimator",
+    "placebo": 1.2657514967309522,
+    "placebo_lo": -2.102144987603443,
+    "placebo_hi": 5.398493713282271,
+    "campaign": 0.5879508938022102,
+    "lo": -3.501969507293771,
+    "hi": 5.210907375672385,
+    "ci": "household bootstrap",
+    "campaign_pct": 1.2710448468030013,
+    "placebo_pct": 2.7363287210075753,
+    "campaign_minus_placebo": -0.677800602928742,
+    "placebo_size": "$1 to $2"
+   }
+  ],
+  "clean": [
+   "ANCOVA (OLS with covariates)",
+   "Covariate adjustment with the PS",
+   "S-learner (linear)",
+   "S-learner (gradient boosting)",
+   "T-learner (linear)",
+   "Double ML (gradient boosting)",
+   "Double ML (lasso)",
+   "Doubly robust learner",
+   "Causal forest"
+  ],
+  "middle": [
+   "PS matching (caliper 0.2 SD)",
+   "PS stratification (quintiles)",
+   "T-learner (gradient boosting)",
+   "Balancing weights + regression (Section 7)"
+  ],
+  "large": [
+   "Inverse probability weighting (ATT)",
+   "X-learner (gradient boosting)"
+  ],
+  "clean_min": -0.14999534167387535,
+  "clean_max": 1.2923485200274138,
+  "diff_min": -2.2112435915200237,
+  "diff_max": 1.011967968094575,
+  "ate_iptw": 11.837936075508647,
+  "ate_iptw_placebo": 11.707502095243822,
+  "max_ate_weight": 100.0
+ },
  "funnel": {
   "mailings": 7208,
   "mailings_redeemed": 889,
@@ -2071,6 +2545,52 @@
    "after_hi": 1.6278908122851274
   }
  ],
+ "cate": {
+  "table": [
+   {
+    "tier": "Least frequent 25%",
+    "households": 259,
+    "baseline_trips_per_week": 0.4657335907335907,
+    "baseline_spend": 20.58097972972973,
+    "cate": 0.2594847144727502,
+    "lo": -4.533010699419361,
+    "hi": 5.0519801283648595,
+    "cate_pct": 1.2607986494341576
+   },
+   {
+    "tier": "25-50%",
+    "households": 258,
+    "baseline_trips_per_week": 1.0169573643410852,
+    "baseline_spend": 35.70187015503876,
+    "cate": 0.41539107645933315,
+    "lo": -4.888050758850305,
+    "hi": 5.7188329117689705,
+    "cate_pct": 1.1634994879972895
+   },
+   {
+    "tier": "50-75%",
+    "households": 258,
+    "baseline_trips_per_week": 1.6080426356589148,
+    "baseline_spend": 47.04328972868217,
+    "cate": 0.7079908552950953,
+    "lo": -5.78630222007054,
+    "hi": 7.2022839306607285,
+    "cate_pct": 1.504977350390177
+   },
+   {
+    "tier": "Most frequent 25%",
+    "households": 258,
+    "baseline_trips_per_week": 3.552325581395349,
+    "baseline_spend": 81.80253875968992,
+    "cate": 1.2719074703578779,
+    "lo": -10.640828387084568,
+    "hi": 13.18464332780032,
+    "cate_pct": 1.5548508513829151
+   }
+  ],
+  "sd_of_household_effects": 3.4702863396046033,
+  "share_positive": 0.6621490803484995
+ },
  "robustness": {
   "table": [
    {
@@ -2192,6 +2712,21 @@
     "after": 7.933588076717007,
     "after_lo": -161.93194653201377,
     "after_hi": 209.68685144395246
+   },
+   {
+    "check": "No check window: adjust on all pre-campaign weeks",
+    "treated": 1033,
+    "control_ess": 521.4287094397229,
+    "baseline_weekly_spend": 46.2572894482091,
+    "holdout": 2.400103935766042e-16,
+    "holdout_lo": -2.4001039357660417e-15,
+    "holdout_hi": 3.570904636931914e-15,
+    "during": -0.8643985401232664,
+    "during_lo": -7.616063144465744,
+    "during_hi": 7.484415594458713,
+    "after": -4.1505451456919324,
+    "after_lo": -12.325436475426933,
+    "after_hi": 4.978881468423721
    }
   ],
   "long_horizon": [
@@ -2254,6 +2789,199 @@
   "se_main": 2.2975911271571525,
   "mde_dollars": 6.433255156040027,
   "mde_pct": 13.907548913437463
+ },
+ "design": {
+  "sd_level": 42.88704664305584,
+  "sd_blocked": 38.36989780707421,
+  "sd_change": 31.3029417104369,
+  "sd_ancova": 28.197484618606698,
+  "r2_ancova": 0.5677167016652045,
+  "table": [
+   {
+    "outcome analysed": "Spending level",
+    "sd ($/week)": 42.88704664305584,
+    "per group, 1% lift": 134784,
+    "per group, 2% lift": 33696,
+    "per group, 5% lift": 5391,
+    "total with 10% holdout, 2% lift": 187200
+   },
+   {
+    "outcome analysed": "Spending level, blocked on frequency tier",
+    "sd ($/week)": 38.36989780707421,
+    "per group, 1% lift": 107886,
+    "per group, 2% lift": 26972,
+    "per group, 5% lift": 4315,
+    "total with 10% holdout, 2% lift": 149842
+   },
+   {
+    "outcome analysed": "Change from baseline",
+    "sd ($/week)": 31.3029417104369,
+    "per group, 1% lift": 71805,
+    "per group, 2% lift": 17951,
+    "per group, 5% lift": 2872,
+    "total with 10% holdout, 2% lift": 99729
+   },
+   {
+    "outcome analysed": "ANCOVA on pre-campaign measures",
+    "sd ($/week)": 28.197484618606698,
+    "per group, 1% lift": 58265,
+    "per group, 2% lift": 14566,
+    "per group, 5% lift": 2331,
+    "total with 10% holdout, 2% lift": 80923
+   }
+  ]
+ },
+ "iv": {
+  "first_stage": 0.11519845111326234,
+  "n_compliers": 119,
+  "late": 5.103809019308262,
+  "late_lo": -30.39944958852492,
+  "late_hi": 45.23417915184516,
+  "tsls": 8.74005618905117,
+  "itt": 0.5879508938022102
+ },
+ "attribution": {
+  "visit_rate": 0.695339510441156,
+  "effect": 0.02177998653906334,
+  "excess_fraction": 0.03132280880349384,
+  "excess_lo": -0.015490735552143474,
+  "excess_hi": 0.08268015410592974
+ },
+ "bayes_net": {
+  "learned_edges": [
+   [
+    "Coupon",
+    "Redeemed"
+   ],
+   [
+    "PreFreq",
+    "Coupon"
+   ],
+   [
+    "PreFreq",
+    "Spend"
+   ],
+   [
+    "PreSpend",
+    "Coupon"
+   ],
+   [
+    "PreSpend",
+    "PreFreq"
+   ],
+   [
+    "PreSpend",
+    "Spend"
+   ]
+  ],
+  "bic_learned": -22814.763938912663,
+  "bic_assumed": -23063.025781509055,
+  "coupon_to_spend": false,
+  "redeemed_to_spend": false,
+  "p_high_given_coupon": {
+   "no": 0.7531887755102041,
+   "yes": 0.7531887755102041
+  },
+  "raw_p_high": {
+   "no": 0.27783219066274895,
+   "yes": 0.6621490803484995
+  }
+ },
+ "g_formula": {
+  "counts": {
+   "0": {
+    "0": 859,
+    "1": 129
+   },
+   "1": {
+    "0": 86,
+    "1": 291
+   }
+  },
+  "table": [
+   {
+    "quantity": "both_campaigns",
+    "estimate ($/week)": 1.011145431969581,
+    "95% CI low": -5.575571076346519,
+    "95% CI high": 8.02033280192315
+   },
+   {
+    "quantity": "first_only",
+    "estimate ($/week)": 2.9936374982598473,
+    "95% CI low": -2.122156484627894,
+    "95% CI high": 9.486304406614586
+   },
+   {
+    "quantity": "second_only",
+    "estimate ($/week)": -1.9824920662902663,
+    "95% CI low": -5.869626542335291,
+    "95% CI high": 2.4658746825769002
+   },
+   {
+    "quantity": "one_regression_adjusting_for_L",
+    "estimate ($/week)": -0.07558263396957576,
+    "95% CI low": -5.213987486197917,
+    "95% CI high": 5.272010837085652
+   },
+   {
+    "quantity": "first_campaign_on_L_spend",
+    "estimate ($/week)": 1.5718710134205012,
+    "95% CI low": -3.193973622437751,
+    "95% CI high": 6.680425393731922
+   },
+   {
+    "quantity": "level_without_campaigns",
+    "estimate ($/week)": 25.52649317823698,
+    "95% CI low": 22.894571970493477,
+    "95% CI high": 28.114885584186677
+   }
+  ]
+ },
+ "measurement": {
+  "loadings": [
+   {
+    "indicator": "Weekly spending",
+    "loading": 0.8106640644767565,
+    "reliability": 0.6571762254339749
+   },
+   {
+    "indicator": "Trips per week",
+    "loading": 0.8713511081466394,
+    "reliability": 0.7592527536683765
+   },
+   {
+    "indicator": "Share of weeks with a trip",
+    "loading": 0.8131657709357875,
+    "reliability": 0.6612385710215936
+   }
+  ],
+  "ladder": [
+   {
+    "adjusting_for": "No covariates",
+    "campaign": 25.75432371121275,
+    "placebo": 26.200544943003262
+   },
+   {
+    "adjusting_for": "Baseline spending only",
+    "campaign": 2.648880987654823,
+    "placebo": 2.4338845680676524
+   },
+   {
+    "adjusting_for": "All three baseline indicators",
+    "campaign": 3.763517941460951,
+    "placebo": 3.215699723563551
+   },
+   {
+    "adjusting_for": "Baseline and the period before",
+    "campaign": 1.3735705317891385,
+    "placebo": 0.6011280787014677
+   },
+   {
+    "adjusting_for": "All twelve measures",
+    "campaign": 0.9028416100061061,
+    "placebo": 0.20755876524774608
+   }
+  ]
  },
  "meta": {
   "n_households_all": 2500,

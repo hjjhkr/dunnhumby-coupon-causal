@@ -57,6 +57,7 @@ p { font-size: 32px; line-height: 1.65; }
 .big { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 132px; font-weight: 500; line-height: 1.05; color: var(--blue); }
 .huge { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 300px; font-weight: 500; line-height: 1; }
 .tag { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; color: var(--blue); line-height: 1.3; }
+.formula { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 56px; font-weight: 500; line-height: 1.3; color: var(--blue); }
 
 /* Bar charts: every bar stands on one baseline */
 .chartrow { display: flex; gap: 96px; align-items: flex-start; }

@@ -198,6 +198,11 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
   <div class="wide"><figure class="chart" id="c-naive"></figure></div>
   <div class="col">
     <p>But look at the left pair of bars. <b>Before a single coupon was sent, the two groups were already <span data-v="k.ratio_before" data-f="x1"></span> times apart.</b> The gap was not caused by the coupons. It was caused by who the retailer chose.</p>
+    <p>This is Simpson's paradox at work: a comparison on the whole population changes once you compare like with like. Put recipients next to non-recipients who shopped in the same number of weeks beforehand, and most of the gap goes away.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-strata"></figure></div>
+  <div class="col">
+    <p>Across everyone, recipients spend <span data-v="k.strata_gap" data-f="usd0"></span> a week more. Inside the most active group, where most recipients are, the gap is <span data-v="k.strata_top_gap" data-f="usd0"></span>. Splitting the data by hand is still too coarse, though. To do it properly we need to say exactly what has to be held equal.</p>
   </div>
 </section>
 
@@ -233,6 +238,29 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
         <tr><td>Before/after, with non-recipients as the reference</td><td>Coupons cut spending by <span data-v="k.did_during_pct" data-f="abspct0"></span>–<span data-v="k.did_after_pct" data-f="abspct0"></span></td><td>Recipients were chosen at a high point</td></tr>
       </tbody>
     </table></div>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">The causal graph</p>
+    <h2>What to adjust for, and what to leave alone</h2>
+    <p>A causal graph writes down who influences whom. Each arrow is a claim: past shopping habits drive both who gets a coupon and how much a household spends; a coupon can only be redeemed if it was received; households that shop more in a given week both redeem more and spend more.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-dag"></figure></div>
+  <div class="wide">
+    <div class="scroll"><table class="story">
+      <thead><tr><th>Pattern in the graph</th><th>What it means here</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td><b>Fork</b><br><span class="num">T ← H → Y</span></td><td>Past shopping is a common cause of getting a coupon and of spending. This is the confounding behind the raw gap.</td><td>Adjust for shopping history.</td></tr>
+        <tr><td><b>Chain</b><br><span class="num">T → R → Y</span></td><td>Redemption carries part of whatever effect the campaign has.</td><td>Leave it alone.</td></tr>
+        <tr><td><b>Collider</b><br><span class="num">T → R ← V</span></td><td>Redeeming depends on receiving a coupon and on how much the household happens to shop that week.</td><td>Never split the sample by redemption.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="col">
+    <p class="note"><b>The backdoor criterion.</b> Two paths connect the campaign to spending "through the back door", and both run through pre-campaign shopping history. Holding that history equal blocks them, and because it is measured before the campaign, the campaign cannot have changed it. What remains is the effect of the campaign on the households that received it.</p>
+    <p>We also tested a simpler graph, in which the retailer looks at just one 9-week window. The data reject it: other weeks still help predict who gets a coupon. So the analysis adjusts for the whole pre-campaign history, twelve measures over four periods.</p>
   </div>
 </section>
 
@@ -287,6 +315,21 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
 
 <section>
   <div class="col">
+    <p class="kicker">A second opinion</p>
+    <h2><span data-v="k.toolkit_n" data-f="int"></span> estimators, one test, the same answer</h2>
+    <p>The estimate above comes from one method built for this data. We repeated it with the standard toolkit of causal inference: regression with covariates, four ways of using propensity scores, the meta-learners, double machine learning, a doubly robust learner and a causal forest.</p>
+    <p>Each method is judged by the same <b>placebo test</b>. We run it once on spending during the campaign, and once on spending in the 8 weeks <i>before</i>, when nobody had a coupon. The true effect on that second outcome is zero, so whatever a method reports there is its own bias.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-toolkit"></figure></div>
+  <div class="col">
+    <p><b><span data-v="k.toolkit_clean_n" data-f="int"></span> methods have a clean placebo, within $1 of zero.</b> They all put the campaign effect between <span data-v="k.toolkit_clean_min" data-f="susd1"></span> and <span data-v="k.toolkit_clean_max" data-f="susd1"></span> a week, which is <span data-v="k.toolkit_clean_min_pct" data-f="spct1"></span> to <span data-v="k.toolkit_clean_max_pct" data-f="spct1"></span> of baseline spending.</p>
+    <p>Weighting by the propensity score fails the test: it reports about <span data-v="k.iptw_placebo" data-f="susd0"></span> a week before the campaign has even started. Recipients and non-recipients overlap so little that a few households end up carrying most of the weight. Whatever bias a method shows on the placebo, it shows much the same bias during the campaign, so the difference between the two stays close to zero.</p>
+    <p>Before any adjustment, the same comparison gives <span data-v="k.toolkit_raw" data-f="susd0"></span> a week, on the placebo and on the campaign alike.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
     <p class="kicker">Why nothing shows up</p>
     <h2>Most coupons were never used</h2>
     <p>The estimate for total spending is noisy and can only rule out large effects. So look from another angle: for coupons to create new sales, somebody has to use them first.</p>
@@ -335,7 +378,20 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
     <h2>"Customers who used a coupon spent more"</h2>
     <p>Many marketing reports compare people who used a coupon with people who did not. Done that way, households that redeemed spend <span data-v="k.redeemers_during" data-f="usd1"></span> a week more than the controls during the campaign.</p>
     <p>But <b>in the 8 weeks before the campaign started, they were already spending <span data-v="k.redeemers_holdout" data-f="usd1"></span> more.</b> The households that go on to use a coupon are the ones whose buying was already rising. Whether to redeem is the customer's own choice after the coupon arrives; splitting on it treats an outcome as a cause.</p>
+    <p>In the causal graph, redemption is a collider: it is caused by the coupon and by how much the household happens to shop. Splitting on it lets that shopping leak into the comparison.</p>
     <p>That is why this study compares households by whether they <i>received</i> coupons, not by whether they <i>used</i> them.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <p class="kicker">Who responds</p>
+    <h2>No type of household shows a clear response</h2>
+    <p>Perhaps the average hides a group that does respond. A causal forest estimates an effect for every recipient household; here those are averaged by how often the household shopped before the campaign.</p>
+  </div>
+  <div class="wide"><figure class="chart" id="c-cate"></figure></div>
+  <div class="col">
+    <p>The estimates rise slightly with shopping frequency, but every interval includes zero and they all overlap. There is no group for which the campaign visibly pays off.</p>
   </div>
 </section>
 
@@ -360,6 +416,10 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
       <tbody></tbody>
     </table></div>
     <p class="fine">At a 5% significance level and 80% power. This study has <span data-v="k.n_treated" data-f="int"></span> treated households.</p>
+  </div>
+  <div class="col">
+    <h3>A design the retailer could run</h3>
+    <p>Sort the households a campaign would normally go to into tiers by shopping frequency. Within each tier, hold out a random 10% and send the campaign to the rest. Then compare spending, adjusting for each household's spending beforehand. Adjusting this way cuts the households needed for a 1% lift from <span data-v="k.design_n_level" data-f="int"></span> to <span data-v="k.design_n_ancova" data-f="int"></span> per group; detecting a 2% lift with a 10% holdout takes about <span data-v="k.design_total_2pct" data-f="int"></span> households in total.</p>
   </div>
   <div class="col">
     <p>The smallest effect this study could reliably detect is about <span data-v="k.mde_pct" data-f="abspct0"></span>. Yet, as computed above, redemptions can have generated at most <span data-v="k.max_direct_share" data-f="pct1"></span> of spending directly. <b>Even if coupons do have an effect of a few tenths of a percent, 2,500 households cannot show it.</b></p>
@@ -393,6 +453,8 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
         <p><b>Estimator.</b> The main estimator is doubly robust: entropy balancing followed by a regression of the change in spending on the pre-campaign measures, fitted on the controls. Used on their own, regression adjustment gives <span data-v="k.ra_during_pct" data-f="spct1"></span> and entropy balancing <span data-v="k.eb_during_pct" data-f="spct1"></span>.</p>
         <p><b>Confidence intervals.</b> Household-level bootstrap with 1,000 replications, redoing the weighting and regression each time.</p>
         <p><b>Limitations.</b> This is not a randomized experiment. The conclusion rests on one assumption: households with the same pre-campaign purchase records would have followed the same path afterwards without coupons. The check window supports it but cannot prove it. Comparable controls are scarce (an effective sample size of a few hundred after weighting), so the confidence interval for total spending is about ±10%. Only the 12 weeks after a first campaign are estimated. The data comes from a single retailer.</p>
+        <p><b>Other checks.</b> Dividing the campaign's effect by the <span data-v="k.iv_first_stage" data-f="pct0"></span> of first-time recipients who redeem gives the effect per redeeming household (an instrumental-variable reading): <span data-v="k.iv_late" data-f="susd1"></span> a week, with an interval from <span data-v="k.iv_lo" data-f="susd0"></span> to <span data-v="k.iv_hi" data-f="susd0"></span>, too wide to say anything. About <span data-v="k.attr_share" data-f="pct0"></span> of recipients' store visits during a campaign can be attributed to it, at most <span data-v="k.attr_hi" data-f="pct0"></span>. A Bayesian network learned from the data keeps arrows from shopping habits to the coupon and to spending, and none from the coupon to spending.</p>
+        <p><b>One caveat on the check window.</b> Spending in the 8 weeks just before a campaign still helps predict who receives it, even after the twelve measures. The retailer's information reaches closer to the campaign than our adjustment does. The leftover bias is small and pushes estimates up, so it cannot be hiding a positive effect; adjusting on every week before the campaign gives <span data-v="k.nocheck_pct" data-f="spct1"></span>.</p>
         <p><b>Reproducing it.</b> The whole analysis is in <span class="num">coupon_causal_analysis.ipynb</span> in the project, commented step by step and runnable end to end from the raw data. Every number on this page comes from the <span class="num">outputs/results.json</span> file it writes.</p>
       </div>
     </details>
@@ -423,6 +485,8 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
     usd1: function (v) { return '$' + fx(v, 1); },
     usd2: function (v) { return '$' + fx(v, 2); },
     susd2: function (v) { return sign(v) + '$' + fx(v, 2); },
+    susd1: function (v) { return sign(v) + '$' + fx(v, 1); },
+    susd0: function (v) { return sign(v) + '$' + fx(v, 0); },
     pct0: function (v) { return fx(v * 100, 0) + '%'; },
     pct1: function (v) { return fx(v * 100, 1) + '%'; },
     spct0: function (v) { return sign(v) + fx(v, 0) + '%'; },
@@ -620,24 +684,91 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
     o.height = function (w) { return o.rows.length * (w < 700 ? rowH + 14 : rowH) + 52; };
     o.draw = function (svg, w, h, showTip, hideTip) {
       var narrow = w < 700, rh = narrow ? rowH + 14 : rowH;
-      var ml = narrow ? 10 : 330, mr = narrow ? 10 : 150, t0 = 8;
+      var ml = narrow ? 10 : (o.labelW || 330), mr = narrow ? 10 : 150, t0 = 8;
+      var f0 = o.f0 || F.spct0, f1 = o.f1 || F.spct1;
       var X = function (v) { return ml + (v - o.x[0]) / (o.x[1] - o.x[0]) * (w - ml - mr); };
       var bottom = t0 + o.rows.length * rh;
       ticks(o.x[0], o.x[1], 4).forEach(function (v) {
         S('line', { x1: X(v), x2: X(v), y1: t0, y2: bottom, class: v === 0 ? 'axis' : 'grid' }, svg);
-        T(svg, X(v), bottom + 18, F.spct0(v), { 'text-anchor': 'middle' });
+        T(svg, X(v), bottom + 18, f0(v), { 'text-anchor': 'middle' });
       });
       T(svg, (ml + w - mr) / 2, bottom + 38, o.xlabel, { 'text-anchor': 'middle' });
       o.rows.forEach(function (r, i) {
-        var y = t0 + i * rh + (narrow ? 36 : rh / 2), col = i === 0 ? COL[1] : 'var(--neutral)';
+        var y = t0 + i * rh + (narrow ? 36 : rh / 2), col = (i === 0 || o.allMain) ? COL[1] : 'var(--neutral)';
         if (narrow) T(svg, ml, y - 14, r.name, { class: 'dl' }); else T(svg, ml - 14, y + 4, r.name, { 'text-anchor': 'end', class: 'dl' });
         var lo = Math.max(o.x[0], r.lo), hi = Math.min(o.x[1], r.hi);
         S('line', { x1: X(lo), x2: X(hi), y1: y, y2: y, stroke: col, 'stroke-width': 2, 'stroke-linecap': 'round' }, svg);
         var dot = S('circle', { cx: X(r.est), cy: y, r: 5.5, fill: col, stroke: 'var(--surface)', 'stroke-width': 2, tabindex: 0 }, svg);
-        var txt = F.spct1(r.est);
-        if (!narrow) T(svg, w - mr + 14, y + 4, txt + '  [' + F.spct0(r.lo) + ', ' + F.spct0(r.hi) + ']', { class: 'val' });
-        var on = function () { showTip(X(r.est), y - 4, '<span>' + r.name + '</span><br><b>' + txt + '</b> <span style="opacity:.7">[' + F.spct0(r.lo) + ', ' + F.spct0(r.hi) + ']</span><br><span style="opacity:.7">' + F.int(r.n) + ' treated households</span>'); };
+        var txt = f1(r.est);
+        if (!narrow) T(svg, w - mr + 14, y + 4, txt + '  [' + f0(r.lo) + ', ' + f0(r.hi) + ']', { class: 'val' });
+        var on = function () { showTip(X(r.est), y - 4, '<span>' + r.name + '</span><br><b>' + txt + '</b> <span style="opacity:.7">[' + f0(r.lo) + ', ' + f0(r.hi) + ']</span><br><span style="opacity:.7">' + F.int(r.n) + ' treated households</span>'); };
         dot.addEventListener('mouseenter', on); dot.addEventListener('focus', on); dot.addEventListener('mouseleave', hideTip); dot.addEventListener('blur', hideTip);
+      });
+    };
+    frame(id, o);
+  }
+
+  /* ---------- causal graph (boxes and arrows) ---------- */
+  function dagChart(id, o) {
+    o.height = function (w) { return Math.round(Math.max(250, Math.min(380, w * 0.46))); };
+    o.draw = function (svg, w, h) {
+      var narrow = w < 560, fs = narrow ? 10.5 : 12.5, lh = fs + 3, padX = narrow ? 6 : 10, padY = 6;
+      var defs = S('defs', {}, svg);
+      [['ah', 'var(--ink-2)'], ['ahot', 'var(--series-2)']].forEach(function (m) {
+        var mk = S('marker', { id: id + m[0], viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+        S('path', { d: 'M0,0 L10,5 L0,10 z', fill: m[1] }, mk);
+      });
+      var box = {};
+      Object.keys(o.nodes).forEach(function (k) {
+        var n = o.nodes[k], lines = (narrow && n.short) ? n.short : n.lines;
+        var bw = Math.max.apply(null, lines.map(function (t) { return t.length; })) * fs * 0.56 + 2 * padX, bh = lines.length * lh + 2 * padY;
+        box[k] = { cx: n.x / 100 * w, cy: n.y / 50 * h, w: bw, h: bh, lines: lines, observed: n.observed !== false };
+      });
+      function edgePoint(b, tx, ty) {           /* where the line from the box centre toward (tx, ty) leaves the box */
+        var dx = tx - b.cx, dy = ty - b.cy, sx = (b.w / 2 + 4) / Math.abs(dx || 1e-9), sy = (b.h / 2 + 4) / Math.abs(dy || 1e-9), s = Math.min(sx, sy);
+        return [b.cx + dx * s, b.cy + dy * s];
+      }
+      o.edges.forEach(function (e) {
+        var a = box[e[0]], b = box[e[1]], p1 = edgePoint(a, b.cx, b.cy), p2 = edgePoint(b, a.cx, a.cy), hot = e[2];
+        S('line', { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: hot ? 'var(--series-2)' : 'var(--ink-2)', 'stroke-width': hot ? 2.2 : 1.4,
+          'marker-end': 'url(#' + id + (hot ? 'ahot' : 'ah') + ')' }, svg);
+      });
+      Object.keys(box).forEach(function (k) {
+        var b = box[k];
+        S('rect', { x: b.cx - b.w / 2, y: b.cy - b.h / 2, width: b.w, height: b.h, rx: 7, fill: b.observed ? 'var(--surface)' : 'var(--wash)',
+          stroke: b.observed ? 'var(--ink-2)' : 'var(--muted)', 'stroke-width': 1.3, 'stroke-dasharray': b.observed ? null : '5 4' }, svg);
+        b.lines.forEach(function (t, i) {
+          T(svg, b.cx, b.cy - (b.lines.length - 1) * lh / 2 + i * lh + fs * 0.36, t, { 'text-anchor': 'middle', class: 'dl', style: 'font-size:' + fs + 'px' + (i === 0 && b.lines.length > 1 ? ';font-weight:600' : '') });
+        });
+      });
+    };
+    frame(id, o);
+  }
+
+  /* ---------- placebo vs campaign estimate for each method ---------- */
+  function dotPairs(id, o) {
+    var rowH = 34;
+    o.height = function (w) { return o.rows.length * (w < 700 ? rowH + 14 : rowH) + 56; };
+    o.draw = function (svg, w, h, showTip, hideTip) {
+      var narrow = w < 700, rh = narrow ? rowH + 14 : rowH, ml = narrow ? 10 : 300, mr = 20, t0 = 8;
+      var X = function (v) { return ml + (Math.max(o.x[0], Math.min(o.x[1], v)) - o.x[0]) / (o.x[1] - o.x[0]) * (w - ml - mr); };
+      var bottom = t0 + o.rows.length * rh;
+      S('rect', { x: X(-o.band), y: t0, width: X(o.band) - X(-o.band), height: bottom - t0, fill: 'var(--band-b)' }, svg);
+      ticks(o.x[0], o.x[1], 6).forEach(function (v) {
+        S('line', { x1: X(v), x2: X(v), y1: t0, y2: bottom, class: v === 0 ? 'axis' : 'grid' }, svg);
+        T(svg, X(v), bottom + 18, sign(v) + '$' + Math.abs(v), { 'text-anchor': 'middle' });
+      });
+      T(svg, (ml + w - mr) / 2, bottom + 40, o.xlabel, { 'text-anchor': 'middle' });
+      var fmt = function (v) { return sign(v) + '$' + Math.abs(v).toFixed(1); };
+      o.rows.forEach(function (r, i) {
+        var y = t0 + i * rh + (narrow ? 32 : rh / 2);
+        if (narrow) T(svg, ml, y - 13, r.name, { class: 'dl' }); else T(svg, ml - 14, y + 4, r.name, { 'text-anchor': 'end', class: 'dl' });
+        if (r.lo != null) S('line', { x1: X(r.lo), x2: X(r.hi), y1: y, y2: y, stroke: COL[1], 'stroke-width': 1.6, opacity: 0.5, 'stroke-linecap': 'round' }, svg);
+        S('circle', { cx: X(r.placebo), cy: y, r: 5.5, fill: 'var(--surface)', stroke: COL[2], 'stroke-width': 2 }, svg);
+        S('circle', { cx: X(r.campaign), cy: y, r: 5.5, fill: COL[1], stroke: 'var(--surface)', 'stroke-width': 1.5 }, svg);
+        var hit = S('rect', { x: ml, y: y - rh / 2 + 2, width: w - ml - mr, height: rh - 4, class: 'hit', tabindex: 0 }, svg);
+        var on = function () { showTip(X(r.campaign), y - 6, '<span>' + r.name + '</span><br>Campaign <b>' + fmt(r.campaign) + '</b>' + (r.lo != null ? ' <span style="opacity:.7">[' + fmt(r.lo) + ', ' + fmt(r.hi) + ']</span>' : '') + '<br>Placebo <b>' + fmt(r.placebo) + '</b>'); };
+        hit.addEventListener('mouseenter', on); hit.addEventListener('focus', on); hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
       });
     };
     frame(id, o);
@@ -656,6 +787,34 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
     series: [{ c: 1, name: 'Ever received', y: [K.treated_before, K.treated_after] }, { c: 2, name: 'Never received', y: [K.never_before, K.never_after] }],
     ymax: 60, yfmt: usd0, vfmt: usd1, maxBar: 86,
     table: { head: ['Period', 'Ever received', 'Never received', 'Ratio'], rows: [['Before any campaign', usd1(K.treated_before), usd1(K.never_before), K.ratio_before.toFixed(1)], ['After campaigns begin', usd1(K.treated_after), usd1(K.never_after), K.ratio_after.toFixed(1)]] }
+  });
+
+  /* ---------- 1b. the same gap inside activity strata ---------- */
+  var st = C.strata;
+  barChart('c-strata', {
+    title: 'Compare like with like and most of the gap disappears',
+    sub: 'Weekly spending during the campaign ($), for households with the same number of active weeks in the 8 weeks before.',
+    legend: [{ c: 1, name: 'Received the campaign', sq: 1 }, { c: 2, name: 'Not reached yet', sq: 1 }],
+    cats: st.map(function (r) { return r.label; }),
+    series: [{ c: 1, name: 'Received', y: st.map(function (r) { return r.treated; }) }, { c: 2, name: 'Not reached yet', y: st.map(function (r) { return r.control; }) }],
+    ymax: 80, yfmt: usd0, vfmt: usd0, maxBar: 44, xlabel: 'Weeks with a shopping trip in the 8-week baseline window',
+    extra: function (i, j) { return F.int(j === 0 ? st[i].n_treated : st[i].n_control) + ' household rows'; },
+    table: { head: ['Active weeks', 'Received', 'Not reached yet', 'Gap'], rows: st.map(function (r) { return [r.label, usd1(r.treated), usd1(r.control), F.susd1(r.treated - r.control)]; }) }
+  });
+
+  /* ---------- 1c. the causal graph ---------- */
+  dagChart('c-dag', {
+    title: 'The causal graph of the coupon problem',
+    sub: 'Solid boxes are observed, dashed boxes are not. Orange arrows are the backdoor paths between the campaign and spending.',
+    nodes: {
+      U: { x: 52, y: 5.5, lines: ['U', 'household traits'], short: ['U', 'traits'], observed: false },
+      H: { x: 15, y: 25, lines: ['H', 'pre-campaign', 'shopping history'], short: ['H', 'shopping', 'history'] },
+      T: { x: 36, y: 41.5, lines: ['T', 'coupon campaign'], short: ['T', 'coupon'] },
+      R: { x: 62, y: 27.5, lines: ['R', 'redemption'], short: ['R', 'redeem'] },
+      V: { x: 77, y: 6.5, lines: ['V', 'shopping that week'], short: ['V', 'that week'], observed: false },
+      Y: { x: 89, y: 41.5, lines: ['Y', 'spending'] }
+    },
+    edges: [['U', 'H', 1], ['U', 'Y', 1], ['H', 'T', 1], ['H', 'Y', 1], ['T', 'R'], ['R', 'Y'], ['T', 'Y'], ['V', 'R'], ['V', 'Y']]
   });
 
   /* ---------- 2. selection rule ---------- */
@@ -705,6 +864,15 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
     table: { head: ['Week', 'Weighted', '95% low', '95% high', 'Unadjusted'], rows: ev.ks.map(function (k, i) { return [String(k).replace('-', '−'), sd(ev.dr[i]), sd(ev.dr_lo[i]), sd(ev.dr_hi[i]), sd(ev.did[i])]; }) }
   });
 
+  /* ---------- 5b. the course toolkit ---------- */
+  dotPairs('c-toolkit', {
+    title: 'Every method with a clean placebo puts the campaign effect near zero',
+    sub: 'Estimated effect on weekly spending ($) for households that received a campaign. Blue lines are 95% confidence intervals where the method provides one. The shaded band is within $1 of zero.',
+    legend: [{ c: 1, name: 'Campaign: spending in weeks 0 to 6', sq: 1 }, { c: 2, name: 'Placebo: the 8 weeks before, when the true effect is zero', sq: 1 }],
+    rows: C.toolkit, x: [-12, 12], band: 1, xlabel: 'Dollars per week',
+    table: { head: ['Method', 'Placebo', 'Campaign', '95% interval'], rows: C.toolkit.map(function (r) { return [r.name, F.susd1(r.placebo), F.susd1(r.campaign), r.lo == null ? '—' : '[' + F.susd1(r.lo) + ', ' + F.susd1(r.hi) + ']']; }) }
+  });
+
   /* ---------- 6. funnel ---------- */
   hbarChart('c-funnel', {
     title: 'Only 1 mailing in 8 was ever used',
@@ -747,6 +915,14 @@ footer { margin-top: 72px; font-size: 13.5px; color: var(--muted); border-top: 1
     regions: [{ x0: -0.5, x1: 6.5, label: 'campaign', blue: 1 }],
     series: [{ c: 1, name: 'Change in share', y: sh.ddd, lo: sh.lo, hi: sh.hi }],
     table: { head: ['Week', 'Change in share (pp)', '95% low', '95% high'], rows: sh.ks.map(function (k, i) { return [String(k).replace('-', '−'), pp(sh.ddd[i]), pp(sh.lo[i]), pp(sh.hi[i])]; }) }
+  });
+
+  /* ---------- 9b. heterogeneity from the causal forest ---------- */
+  forest('c-cate', {
+    title: 'Estimated effect by how often the household shopped before the campaign',
+    sub: 'Causal forest. Dot: average effect on weekly spending in the group ($). Line: 95% interval.',
+    rows: C.cate, x: [-15, 15], xlabel: 'Dollars per week', labelW: 200, allMain: true, f0: F.susd0, f1: F.susd1,
+    table: { head: ['Group', 'Households', 'Baseline spending', 'Effect', '95% interval'], rows: C.cate.map(function (r) { return [r.name, F.int(r.n), usd0(r.base), F.susd1(r.est), '[' + F.susd1(r.lo) + ', ' + F.susd1(r.hi) + ']']; }) }
   });
 
   /* ---------- 10. robustness ---------- */
